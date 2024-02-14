@@ -1,0 +1,34 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+/* Hide the scrollbar completely while allowing scrolling */
+/* For Webkit based browsers (Chrome, Safari) */
+::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* For Firefox, to make it work with scrollbar styles */
+* {
+  scrollbar-width: none;
+}
+
+/* Hide scroll buttons in IE/Edge */
+*::-webkit-scrollbar-button {
+  display: none;
+}
+@font-face {
+  font-family: "ClashDisplay";
+  src: url("./fonts/ClashDisplay-Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "ClashDisplayBold";
+  src: url("./fonts/ClashDisplay-Bold.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
