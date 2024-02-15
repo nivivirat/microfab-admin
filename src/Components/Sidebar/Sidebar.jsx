@@ -49,8 +49,8 @@ export default function SideBar() {
                             <div>
                                 <ul className='flex flex-col gap-5 mt-5'>
                                     <Nav title={"Home Banner"} destination={""} />
-                                    {/* <Nav title={"Events"} destination={"Events"} />
-                                    <Nav title={"Testimonials"} destination={"Testimonials"} />
+                                    <Nav title={"Contact Us"} destination={"ContactUs"} />
+                                    {/* <Nav title={"Testimonials"} destination={"Testimonials"} />
                                     <Nav title={"Principals"} destination={"Principals"} />
                                     <Nav title={"Media"} destination={"Media"} />
                                     <Nav title={"Careers"} destination={"Careers"} />
