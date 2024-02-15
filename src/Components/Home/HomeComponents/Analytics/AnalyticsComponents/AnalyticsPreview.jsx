@@ -26,6 +26,7 @@ export default function AnalyticsPreview() {
                         if (data && 'down' in data && 'left' in data && 'right' in data) {
                             setAnalyticsData(data);
                             setLabelText(data.down?.label || "Countries");
+                            setDuration(data.duration || 7); // Set duration from the fetched data
                         } else {
                             console.error('Invalid data structure in Firebase:', data);
                         }
@@ -60,6 +61,7 @@ export default function AnalyticsPreview() {
             'Home/Analytics/left/number': analyticsData.left.number,
             'Home/Analytics/right/content': analyticsData.right.content,
             'Home/Analytics/right/number': analyticsData.right.number,
+            'Home/Analytics/duration': duration, // Add duration to the data
         };
 
         update(ref(db), dataToUpdate)
@@ -85,7 +87,6 @@ export default function AnalyticsPreview() {
                             value={duration}
                             onChange={(e) => setDuration(e.target.value)}
                         />
-
                     </div>
                 ) : (
                     <></>
@@ -215,5 +216,4 @@ export default function AnalyticsPreview() {
             )}
         </div>
     );
-
 }
