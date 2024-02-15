@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ref, onValue, update } from 'firebase/database';
 import { db } from "../../../firebase";
+import * as XLSX from 'xlsx';
 
 const ContactUs = () => {
     const [contactData, setContactData] = useState([]);
@@ -65,10 +66,53 @@ const ContactUs = () => {
         }
     };
 
+    const handleDownloadClick = () => {
+        try {
+            const workbook = XLSX.utils.book_new();
+            const sheet = XLSX.utils.json_to_sheet(
+                contactData.map((contact, index) => ({
+                    'S.no': index + 1,
+                    'First Name': contact.firstName,
+                    'Last Name': contact.lastName,
+                    'Phone Number': contact.phoneNumber,
+                    'Email': contact.email,
+                    'Service Interested In': contact.serviceInterestedIn,
+                    'Message': contact.message,
+                    'Timestamp (IST)': convertToIST(contact.timestamp),
+                }))
+            );
+
+            // Add the sheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, sheet, 'ContactUsData');
+
+            const today = new Date();
+            const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1)
+                .toString()
+                .padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+
+
+            // Save the workbook to a file with the specified name
+            const fileName = `MicroFab-ContactUs-${formattedDate}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+
+            console.log('Data downloaded successfully');
+        } catch (error) {
+            console.error('Error downloading data:', error.message);
+            // Handle errors or show error messages
+        }
+    };
 
     return (
         <div className="my-8 mr-7">
-            <h2 className="text-2xl font-bold mb-4">Contact Us Data</h2>
+            <div className="flex flex-row justify-between my-5 place-items-center">
+                <h2 className="text-2xl font-bold mb-4 mt-4">Contact Us Data</h2>
+                <button
+                    onClick={handleDownloadClick}
+                    className="bg-green-500 text-white px-2 rounded mr-2 py-2"
+                >
+                    Download Excel
+                </button>
+            </div>
             <table className="w-full border-collapse border border-gray-300">
                 <thead className="bg-gray-200">
                     <tr>
