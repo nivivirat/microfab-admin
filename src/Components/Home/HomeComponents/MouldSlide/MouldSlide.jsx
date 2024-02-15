@@ -1,26 +1,45 @@
-import React, { useEffect, useRef } from 'react';
-import Slider from './Slider/Slider';
 import { Icon } from "@iconify/react";
+import { ref, onValue } from 'firebase/database';
+import { useEffect, useRef, useState } from 'react';
+import { db } from '../../../../../firebase';
+import Slider from './Slider/Slider';
 
 export default function MouldSlide() {
   const scrollRef = useRef(null);
-  const items = [
-    { img: "icon-park-twotone:bottle-two", line1: '200+', line2: 'Moulds' },
-    { img: "icon-park-twotone:bottle-two", line1: '300+', line2: 'Moulds' },
-    { img: "icon-park-twotone:bottle-two", line1: '400+', line2: 'Moulds' },
-    { img: "icon-park-twotone:bottle-two", line1: '500+', line2: 'Moulds' },
-    { img: "icon-park-twotone:bottle-two", line1: '600+', line2: 'Moulds' }
-  ]; // Add more items as needed
-  const allItems = [...items, ...items]; // Duplicate items for infinite scroll
+  let [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const dataRef = ref(db, 'Home/MouldSlide');
+        onValue(dataRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const dataObject = snapshot.val();
+            const dataArray = Object.values(dataObject);
+            setData(dataArray);
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching data from Firebase:', error.message);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  data = [...data, ...data];
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (scrollRef.current) {
-        if (scrollRef.current.scrollLeft >= scrollRef.current.scrollWidth / 2) {
+        const scrollAmount = 20;
+        const scrollWidth = scrollRef.current.scrollWidth / 2;
+
+        if (scrollRef.current.scrollLeft >= scrollWidth) {
           // Reset scroll position to start when it reaches the end of original items
-          scrollRef.current.scrollLeft -= scrollRef.current.scrollWidth / 4;
+          scrollRef.current.scrollLeft -= scrollWidth / 4;
         } else {
-          scrollRef.current.scrollLeft += 20;
+          scrollRef.current.scrollLeft += scrollAmount;
         }
       }
     }, 900);
@@ -37,12 +56,12 @@ export default function MouldSlide() {
 
       {/* middle */}
       <div className="flex flex-row h-[30%] w-[100%] justify-between">
-        <div className="overflow-x-scroll text-center flex place-items-center justify-center w-full" ref={scrollRef} style={{ overflowX: 'hidden' }}>
+        <div className="overflow-x-scroll text-center flex place-items-center justify-center w-full" ref={scrollRef} style={{ overflowX: 'hidden', scrollBehavior: 'smooth' }}>
           <Slider options={{ align: "center" }}>
-            {allItems.map((item, index) => (
-              <div key={index} className={`leading-5 h-full w-[200px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-white' : 'bg-primary'}`}>
+            {data.map((item, index) => (
+              <div key={item.order} className={`leading-5 h-full w-[200px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-white' : 'bg-primary'}`}>
                 <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-white'}`} >
-                  <Icon icon={item.img} className=''/>
+                  <Icon icon={item.img} className='' />
                 </div>
                 <p className="text-[14px]">{item.line1}</p>
                 <p className="text-[14px]">{item.line2}</p>
