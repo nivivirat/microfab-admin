@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { get, ref, update } from 'firebase/database';
+import { getDownloadURL, uploadBytes } from 'firebase/storage';
+import React, { useEffect, useState } from 'react';
 import CountUp from 'react-countup';
 import { db, storage } from '../../../../../firebase';
-import figure from '../../../../assets/AboutUs/KeyFigures/keyFigures.svg'
-import { ref, get, update } from 'firebase/database';
-import { getDownloadURL, uploadBytes, ref as storageRef } from 'firebase/storage';
+import figure from '../../../../assets/AboutUs/KeyFigures/keyFigures.svg';
 
 const KeyFigures = () => {
     const [data, setData] = useState(null);
