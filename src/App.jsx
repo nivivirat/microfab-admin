@@ -17,6 +17,7 @@ function App() {
             {/* <Route path="/media/:id/:heading" element={<SingleFileUpload />} /> */}
             <Route path="/" element={<Home />} />
             <Route path="/ContactUs" element={<ContactUs />} />
+            <Route path="/AboutUs" element={<AboutUs />} />
             <Route path="/SocialMedia" element={<SocialMedia />} />
           </Routes>
         </div>
