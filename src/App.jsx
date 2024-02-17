@@ -4,6 +4,7 @@ import Home from './Components/Home/Home';
 import ContactUs from './Components/ContactUs/ContactUs';
 import AboutUs from './Components/AboutUs/AboutUs';
 import SocialMedia from './Components/SocialMedia/SocialMedia';
+import Testimonials from './Components/Home/HomeComponents/Testimonials/Testimonials';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/ContactUs" element={<ContactUs />} />
             <Route path="/AboutUs" element={<AboutUs />} />
             <Route path="/SocialMedia" element={<SocialMedia />} />
+            <Route path="/Testimonials" element={<Testimonials />} />
           </Routes>
         </div>
 
