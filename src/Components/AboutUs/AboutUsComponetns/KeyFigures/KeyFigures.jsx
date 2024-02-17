@@ -1,16 +1,14 @@
 import { get, ref, update } from 'firebase/database';
-import { getDownloadURL, uploadBytes } from 'firebase/storage';
 import React, { useEffect, useState } from 'react';
 import CountUp from 'react-countup';
-import { db, storage } from '../../../../../firebase';
-import figure from '../../../../assets/AboutUs/KeyFigures/keyFigures.svg';
+import { db } from '../../../../../firebase';
+import figure from '../../../../assets/AboutUs/KeyFigures/figures.svg'
 
 const KeyFigures = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editMode, setEditMode] = useState(false);
-    const [newImage, setNewImage] = useState(null);
 
     useEffect(() => {
         const keyFiguresRef = ref(db, 'AboutUs/keyFigures');
@@ -37,16 +35,6 @@ const KeyFigures = () => {
         // Update the data in the database
         const keyFiguresRef = ref(db, 'AboutUs/keyFigures');
         await update(keyFiguresRef, data);
-
-        // Upload a new image if provided
-        if (newImage) {
-            const storageRef = ref(storage, 'your-storage-path/' + newImage.name);
-            await uploadBytes(storageRef, newImage);
-            const imageURL = await getDownloadURL(storageRef);
-            const newData = { ...data };
-            newData.blocks[0].imageUrl = imageURL;
-            setData(newData);
-        }
 
         setEditMode(false);
     };
