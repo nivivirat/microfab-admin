@@ -37,7 +37,7 @@ export default function SideBar() {
                 ) : (
 
                     // side bar
-                    <div className="z-40 h-screen" onClick={()=>{setIsOpen(false)}}>
+                    <div className="z-40 h-screen" onClick={() => { setIsOpen(false) }}>
                         <div className="bg-base h-full z-50 p-3 w-[300px]">
                             <div className="flex flex-row justify-between">
                                 <img className='sm:h-[45px] sm:w-[90px] h-6 w-10' src={logo} alt='Logo' />
@@ -51,12 +51,7 @@ export default function SideBar() {
                                     <Nav title={"Home Banner"} destination={""} />
                                     <Nav title={"Contact Us"} destination={"ContactUs"} />
                                     <Nav title={"About Us"} destination={"AboutUs"} />
-                                    {/* <Nav title={"Testimonials"} destination={"Testimonials"} />
-                                    <Nav title={"Principals"} destination={"Principals"} />
-                                    <Nav title={"Media"} destination={"Media"} />
-                                    <Nav title={"Careers"} destination={"Careers"} />
-                                    <Nav title={"Contact us"} destination={"ContactUs"} />
-                                    <Nav title={"Newsletter Subscription"} destination={"Newsletter"} /> */}
+                                    <Nav title={"Social Media"} destination={"SocialMedia"} />
                                 </ul>
                             </div>
                         </div>
