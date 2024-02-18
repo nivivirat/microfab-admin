@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ref, onValue, set } from 'firebase/database';
+import { ref, onValue, set, push } from 'firebase/database';
 import { db } from '../../../../../firebase';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -19,7 +19,11 @@ export default function Testimonials() {
         onValue(testimonialsRef, (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                setTestimonials(Object.entries(data));
+                // Convert testimonials object into an array of objects
+                const testimonialArray = Object.entries(data).map(([key, value]) => ({ ...value, uid: key }));
+                // Sort testimonials by timestamp in descending order
+                testimonialArray.sort((a, b) => b.timestamp - a.timestamp);
+                setTestimonials(testimonialArray);
             }
         });
     }, [deletionUid]);
@@ -34,7 +38,10 @@ export default function Testimonials() {
 
     const handleAddTestimonial = () => {
         const uid = uuidv4();
-        set(ref(db, `Home/Testimonials/${uid}`), newTestimonial);
+        const timestamp = Date.now();
+        const testimonialData = { ...newTestimonial, timestamp };
+        // Use push to generate a new unique key and store testimonial data
+        push(ref(db, 'Home/Testimonials'), testimonialData);
         setNewTestimonial({ content: '', author: '', company: '' });
         setFormVisible(false);
     };
@@ -67,10 +74,10 @@ export default function Testimonials() {
                 Add Testimonial
             </button>
 
-            {testimonials.map(([uid, testimonial]) => (
+            {testimonials.map(({ uid, content, author, company }) => (
                 <div key={uid} className="mb-4 border rounded-md p-4">
-                    <p className="text-lg">{testimonial.content}</p>
-                    <p className="mt-2 text-sm">- {testimonial.author}, {testimonial.company}</p>
+                    <p className="text-lg">{content}</p>
+                    <p className="mt-2 text-sm">- {author}, {company}</p>
                     <div className="flex gap-2 mt-2">
                         <button onClick={() => handleEditTestimonial(uid, /* updated testimonial object */)} className="bg-blue-500 text-white px-3 py-1 rounded">Edit</button>
                         <button onClick={() => handleDeleteTestimonial(uid)} className="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
@@ -112,7 +119,6 @@ export default function Testimonials() {
                     </form>
                 </div>
             )}
-
         </div>
     );
 }
