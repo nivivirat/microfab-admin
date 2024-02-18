@@ -54,6 +54,7 @@ export default function SideBar() {
                                     <Nav title={"Social Media"} destination={"SocialMedia"} />
                                     <Nav title={"Testimonials"} destination={"Testimonials"} />
                                     <Nav title={"Manufacturing Page"} destination={"ManufacturingPage"} />
+                                    <Nav title={"Query Form"} destination={"QueryForm"} />
                                 </ul>
                             </div>
                         </div>
