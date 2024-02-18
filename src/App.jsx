@@ -8,6 +8,7 @@ import Testimonials from './Components/Home/HomeComponents/Testimonials/Testimon
 import ManufacturingPage from './Components/ManufacturingPage/ManufacturingPage';
 import QueryForm from './Components/QueryForm/QueryForm';
 import Who_are_we from './Components/WhoAreWe/WhoAreWe';
+import Analytics from './Components/Home/HomeComponents/Analytics/Analytics';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/ManufacturingPage" element={<ManufacturingPage />} />
             <Route path="/QueryForm" element={<QueryForm />} />
             <Route path="/WhoAreWe" element={<Who_are_we />} />
+            <Route path="/Analytics" element={<Analytics />} />
           </Routes>
         </div>
 

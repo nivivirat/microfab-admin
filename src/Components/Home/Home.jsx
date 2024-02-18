@@ -1,4 +1,3 @@
-import Analytics from "./HomeComponents/Analytics/Analytics"
 import Graph from "./HomeComponents/Graph/Graph"
 import MouldSlidePreview from "./HomeComponents/MouldSlide/MouldSlideComponents/MouldSlidePreview"
 
@@ -8,9 +7,6 @@ export default function Home() {
             <MouldSlidePreview />
 
             <Graph />
-
-            <Analytics />
-
         </div>
     )
 }
