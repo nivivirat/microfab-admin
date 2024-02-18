@@ -1,5 +1,5 @@
 // ManufacturingPage.jsx
-import { get, ref, set, onValue } from 'firebase/database';
+import { get, ref, set, onValue, off } from 'firebase/database';
 import React, { useEffect, useState } from 'react';
 import { db } from '../../../firebase';
 import AdvantageCard from './ManufacturingPageComponents/AdvantageCard';
@@ -14,32 +14,43 @@ const ManufacturingPage = () => {
     const [editableAdvantageIndex, setEditableAdvantageIndex] = useState(null);
     const [editableApplicationIndex, setEditableApplicationIndex] = useState(null);
 
-    const fetchData = () => {
-        if (selectedPage) {
-            const advantagesRef = ref(db, `ManufacturingPage/${selectedPage}/advantages`);
-            const applicationsRef = ref(db, `ManufacturingPage/${selectedPage}/applications`);
-
-            // Listen for changes in advantages data
-            onValue(advantagesRef, (snapshot) => {
-                const advantagesData = snapshot.val() || [];
-                setAdvantagesData(advantagesData);
-            });
-
-            // Listen for changes in applications data
-            onValue(applicationsRef, (snapshot) => {
-                const applicationsData = snapshot.val() || [];
-                setApplicationsData(applicationsData);
-            });
-        }
-    };
-
     useEffect(() => {
+        const fetchData = () => {
+            if (selectedPage) {
+                // Advantages data
+                const advantagesRef = ref(db, `ManufacturingPage/${selectedPage}/advantages`);
+                const advantagesListener = onValue(advantagesRef, (snapshot) => {
+                    const advantagesData = snapshot.val() || [];
+                    setAdvantagesData(advantagesData);
+                });
+    
+                // Applications data
+                const applicationsRef = ref(db, `ManufacturingPage/${selectedPage}/applications`);
+                const applicationsListener = onValue(applicationsRef, (snapshot) => {
+                    const applicationsData = snapshot.val() || [];
+                    setApplicationsData(applicationsData);
+                });
+    
+                // Cleanup previous listeners
+                return () => {
+                    off(advantagesRef, 'value', advantagesListener);
+                    off(applicationsRef, 'value', applicationsListener);
+                };
+            }
+        };
+    
+        // Clear state when the page changes
+        setAdvantagesData([]);
+        setApplicationsData([]);
+    
         fetchData();
-    }, [selectedPage]);
+    }, [selectedPage]);    
 
     const handlePageChange = (event) => {
         const page = event.target.value;
         setSelectedPage(page);
+        setAdvantagesData([]);
+        setApplicationsData([]);
     };
 
     const handleEditAdvantage = (index) => {
@@ -55,14 +66,7 @@ const ManufacturingPage = () => {
                 updatedAdvantages[index].content = newContent;
 
                 const advantagesRef = ref(db, `ManufacturingPage/${selectedPage}/advantages`);
-
-                // Filter out null values before updating the array
-                const filteredAdvantages = updatedAdvantages.filter((advantage) => advantage !== null);
-
-                // Use set to replace the entire array with the filtered array
-                await set(advantagesRef, filteredAdvantages);
-
-                setAdvantagesData(filteredAdvantages);
+                await set(advantagesRef, updatedAdvantages);
             } else {
                 console.error(`Index ${index} is out of bounds for advantages array`);
             }
@@ -91,14 +95,7 @@ const ManufacturingPage = () => {
                 updatedApplications[index].img = newImage;
 
                 const applicationsRef = ref(db, `ManufacturingPage/${selectedPage}/applications`);
-
-                // Filter out null values before updating the array
-                const filteredApplications = updatedApplications.filter((application) => application !== null);
-
-                // Use set to replace the entire array with the filtered array
-                await set(applicationsRef, filteredApplications);
-
-                setApplicationsData(filteredApplications);
+                await set(applicationsRef, updatedApplications);
             } else {
                 console.error(`Index ${index} is out of bounds for applications array`);
             }
