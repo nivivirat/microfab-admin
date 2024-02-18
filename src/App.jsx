@@ -5,6 +5,7 @@ import ContactUs from './Components/ContactUs/ContactUs';
 import AboutUs from './Components/AboutUs/AboutUs';
 import SocialMedia from './Components/SocialMedia/SocialMedia';
 import Testimonials from './Components/Home/HomeComponents/Testimonials/Testimonials';
+import ManufacturingPage from './Components/ManufacturingPage/ManufacturingPage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/AboutUs" element={<AboutUs />} />
             <Route path="/SocialMedia" element={<SocialMedia />} />
             <Route path="/Testimonials" element={<Testimonials />} />
+            <Route path="/ManufacturingPage" element={<ManufacturingPage />} />
           </Routes>
         </div>
 
