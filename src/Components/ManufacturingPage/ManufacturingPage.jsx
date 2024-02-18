@@ -1,4 +1,5 @@
-import { get, ref, set } from 'firebase/database';
+// ManufacturingPage.jsx
+import { get, ref, set, onValue } from 'firebase/database';
 import React, { useEffect, useState } from 'react';
 import { db } from '../../../firebase';
 import AdvantageCard from './ManufacturingPageComponents/AdvantageCard';
@@ -7,33 +8,32 @@ import ApplicationCard from './ManufacturingPageComponents/ApplicationCard';
 const ManufacturingPage = () => {
     const manufacturingPages = ['BFS', 'FFS', 'ISBM', 'IV'];
 
-    const [selectedPage, setSelectedPage] = useState('BFS');
+    const [selectedPage, setSelectedPage] = useState('');
     const [advantagesData, setAdvantagesData] = useState([]);
     const [applicationsData, setApplicationsData] = useState([]);
     const [editableAdvantageIndex, setEditableAdvantageIndex] = useState(null);
     const [editableApplicationIndex, setEditableApplicationIndex] = useState(null);
 
+    const fetchData = () => {
+        if (selectedPage) {
+            const advantagesRef = ref(db, `ManufacturingPage/${selectedPage}/advantages`);
+            const applicationsRef = ref(db, `ManufacturingPage/${selectedPage}/applications`);
+
+            // Listen for changes in advantages data
+            onValue(advantagesRef, (snapshot) => {
+                const advantagesData = snapshot.val() || [];
+                setAdvantagesData(advantagesData);
+            });
+
+            // Listen for changes in applications data
+            onValue(applicationsRef, (snapshot) => {
+                const applicationsData = snapshot.val() || [];
+                setApplicationsData(applicationsData);
+            });
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            if (selectedPage) {
-                const advantagesRef = ref(db, `ManufacturingPage/${selectedPage}/advantages`);
-                const applicationsRef = ref(db, `ManufacturingPage/${selectedPage}/applications`);
-
-                try {
-                    const advantagesSnapshot = await get(advantagesRef);
-                    const applicationsSnapshot = await get(applicationsRef);
-
-                    const advantagesData = advantagesSnapshot.val() || [];
-                    const applicationsData = applicationsSnapshot.val() || [];
-
-                    setAdvantagesData(advantagesData);
-                    setApplicationsData(applicationsData);
-                } catch (error) {
-                    console.error('Error fetching data:', error.message);
-                }
-            }
-        };
-
         fetchData();
     }, [selectedPage]);
 
@@ -77,8 +77,44 @@ const ManufacturingPage = () => {
         setEditableAdvantageIndex(null);
     };
 
+    const handleEditApplication = (index) => {
+        setEditableApplicationIndex(index);
+    };
+
+    const handleSaveApplication = async (index, newHeading, newContent, newImage) => {
+        try {
+            const updatedApplications = [...applicationsData];
+
+            if (index >= 0 && index < updatedApplications.length && updatedApplications[index]) {
+                updatedApplications[index].heading = newHeading;
+                updatedApplications[index].content = newContent;
+                updatedApplications[index].img = newImage;
+
+                const applicationsRef = ref(db, `ManufacturingPage/${selectedPage}/applications`);
+
+                // Filter out null values before updating the array
+                const filteredApplications = updatedApplications.filter((application) => application !== null);
+
+                // Use set to replace the entire array with the filtered array
+                await set(applicationsRef, filteredApplications);
+
+                setApplicationsData(filteredApplications);
+            } else {
+                console.error(`Index ${index} is out of bounds for applications array`);
+            }
+        } catch (error) {
+            console.error('Error updating application:', error.message);
+        } finally {
+            setEditableApplicationIndex(null);
+        }
+    };
+
+    const handleCancelApplication = () => {
+        setEditableApplicationIndex(null);
+    };
+
     return (
-        <div className="container mx-auto mt-8 p-8 bg-primary text-black rounded-lg">
+        <div className="container mt-8 p-8  text-black rounded-lg">
             <div className="mb-4">
                 <label className="block text-lg mb-2">Select Manufacturing Page:</label>
                 <select
@@ -98,7 +134,7 @@ const ManufacturingPage = () => {
             <div>
                 <h2 className="text-2xl font-semibold mb-4">Advantages:</h2>
                 <p className='font-semibold my-4 text-red-800'>*The content must be less than 40 words</p>
-                <div className="w-full h-full flex flex-wrap gap-5">
+                <div className="w-full h-full flex flex-wrap gap-5 bg-primary p-10">
                     {advantagesData && advantagesData.length > 0 && advantagesData.map((item, index) => (
                         <div key={index} className="xl:w-[48%] w-full lg:w-[40%] md:w-[40%]">
                             <AdvantageCard
@@ -123,14 +159,29 @@ const ManufacturingPage = () => {
 
             <div className="mt-8">
                 <h2 className="text-2xl font-semibold mb-4">Applications:</h2>
+                <p className='font-semibold my-4 text-red-800'>*The content must be less than 40 words</p>
+                <p className='font-semibold my-4 text-red-800'>*The images must be in 1:1 ratio (background white color)</p>
+
                 <div className="w-full flex flex-row gap-3 md:overflow-auto overflow-scroll pb-10">
-                    {applicationsData.map((application, index) => (
-                        <ApplicationCard
-                            key={index}
-                            heading={application.heading}
-                            content={application.content}
-                            img={application.img}
-                        />
+                    {applicationsData && applicationsData.length > 0 && applicationsData.map((application, index) => (
+                        <div key={index} className="xl:w-[48%] w-full lg:w-[40%] md:w-[40%]">
+                            <ApplicationCard
+                                heading={application.heading}
+                                content={application.content}
+                                img={application.img}
+                                isEditable={editableApplicationIndex === index}
+                                onSave={(newHeading, newContent, newImage) => handleSaveApplication(index, newHeading, newContent, newImage)}
+                                onCancel={handleCancelApplication}
+                            />
+                            {!editableApplicationIndex && (
+                                <button
+                                    className="bg-primary text-white px-2 py-1 rounded-md mt-2"
+                                    onClick={() => handleEditApplication(index)}
+                                >
+                                    Edit
+                                </button>
+                            )}
+                        </div>
                     ))}
                 </div>
             </div>
