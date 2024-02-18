@@ -12,7 +12,9 @@ export default function Testimonials() {
     });
 
     const [deletionUid, setDeletionUid] = useState(null);
-    const [isFormVisible, setFormVisible] = useState(false);
+    const [isAddFormVisible, setAddFormVisible] = useState(false);
+    const [isEditFormVisible, setEditFormVisible] = useState(false);
+    const [editingUid, setEditingUid] = useState(null);
 
     useEffect(() => {
         const testimonialsRef = ref(db, 'Home/Testimonials');
@@ -43,11 +45,25 @@ export default function Testimonials() {
         // Use push to generate a new unique key and store testimonial data
         push(ref(db, 'Home/Testimonials'), testimonialData);
         setNewTestimonial({ content: '', author: '', company: '' });
-        setFormVisible(false);
+        setAddFormVisible(false);
     };
 
-    const handleEditTestimonial = (uid, updatedTestimonial) => {
-        set(ref(db, `Home/Testimonials/${uid}`), updatedTestimonial);
+    const handleEditTestimonial = (uid, testimonial) => {
+        setEditingUid(uid);
+        setNewTestimonial({
+            ...testimonial,  // Preserve existing values
+            timestamp: testimonial.timestamp,  // Preserve the timestamp
+        });
+        setEditFormVisible(true);
+    };
+
+    const handleSaveChanges = () => {
+        if (editingUid) {
+            setEditFormVisible(false);
+            const updatedTestimonial = { ...newTestimonial };
+            set(ref(db, `Home/Testimonials/${editingUid}`), updatedTestimonial);
+            setEditingUid(null);
+        }
     };
 
     const handleDeleteTestimonial = (uid) => {
@@ -68,19 +84,19 @@ export default function Testimonials() {
             <h2 className="text-2xl font-bold mb-4">Testimonials</h2>
 
             <button
-                onClick={() => setFormVisible(true)}
+                onClick={() => setAddFormVisible(true)}
                 className="absolute top-4 right-4 bg-green-500 text-white px-4 py-2 rounded"
             >
                 Add Testimonial
             </button>
 
-            {testimonials.map(({ uid, content, author, company }) => (
-                <div key={uid} className="mb-4 border rounded-md p-4">
-                    <p className="text-lg">{content}</p>
-                    <p className="mt-2 text-sm">- {author}, {company}</p>
+            {testimonials.map((testimonial) => (
+                <div key={testimonial.uid} className="mb-4 border rounded-md p-4">
+                    <p className="text-lg">{testimonial.content}</p>
+                    <p className="mt-2 text-sm">- {testimonial.author}, {testimonial.company}</p>
                     <div className="flex gap-2 mt-2">
-                        <button onClick={() => handleEditTestimonial(uid, /* updated testimonial object */)} className="bg-blue-500 text-white px-3 py-1 rounded">Edit</button>
-                        <button onClick={() => handleDeleteTestimonial(uid)} className="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+                        <button onClick={() => handleEditTestimonial(testimonial.uid, testimonial)} className="bg-blue-500 text-white px-3 py-1 rounded">Edit</button>
+                        <button onClick={() => handleDeleteTestimonial(testimonial.uid)} className="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
                     </div>
                 </div>
             ))}
@@ -97,11 +113,38 @@ export default function Testimonials() {
                 </div>
             )}
 
-            {isFormVisible && (
+            {isAddFormVisible && (
                 <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-md shadow-md w-96">
                     <div className="flex justify-end">
-                        <button onClick={() => setFormVisible(false)} className="text-xl font-bold">&times;</button>
+                        <button onClick={() => setAddFormVisible(false)} className="text-xl font-bold">&times;</button>
                     </div>
+                    <h3 className="text-xl font-bold mb-4">Add Testimonial</h3>
+                    <form className="flex flex-col gap-4">
+                        <label className="mb-2">
+                            <span className="block text-gray-600">Content:</span>
+                            <textarea name="content" onChange={handleInputChange} className="border p-2 w-full"></textarea>
+                        </label>
+                        <label className="mb-2">
+                            <span className="block text-gray-600">Author:</span>
+                            <input type="text" name="author" onChange={handleInputChange} className="border p-2 w-full" />
+                        </label>
+                        <label className="mb-4">
+                            <span className="block text-gray-600">Company:</span>
+                            <input type="text" name="company" onChange={handleInputChange} className="border p-2 w-full" />
+                        </label>
+                        <button type="button" onClick={handleAddTestimonial} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300 ease-in-out">
+                            Add Testimonial
+                        </button>
+                    </form>
+                </div>
+            )}
+
+            {isEditFormVisible && (
+                <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-md shadow-md w-96">
+                    <div className="flex justify-end">
+                        <button onClick={() => setEditFormVisible(false)} className="text-xl font-bold">&times;</button>
+                    </div>
+                    <h3 className="text-xl font-bold mb-4">Edit Testimonial</h3>
                     <form className="flex flex-col gap-4">
                         <label className="mb-2">
                             <span className="block text-gray-600">Content:</span>
@@ -115,10 +158,13 @@ export default function Testimonials() {
                             <span className="block text-gray-600">Company:</span>
                             <input type="text" name="company" value={newTestimonial.company} onChange={handleInputChange} className="border p-2 w-full" />
                         </label>
-                        <button type="button" onClick={handleAddTestimonial} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300 ease-in-out">Add Testimonial</button>
+                        <button type="button" onClick={handleSaveChanges} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300 ease-in-out">
+                            Save Changes
+                        </button>
                     </form>
                 </div>
             )}
+
         </div>
     );
 }
