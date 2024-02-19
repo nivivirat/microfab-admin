@@ -3,6 +3,8 @@ import MouldSlide from "../MouldSlide";
 import { onValue, ref, set } from "firebase/database";
 import { db } from "../../../../../../firebase";
 import { Icon } from "@iconify/react";
+import { push } from "firebase/database";
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function MouldSlidePreview() {
     const [data, setData] = useState([]);
@@ -12,7 +14,9 @@ export default function MouldSlidePreview() {
     const [newItemData, setNewItemData] = useState({
         line1: "",
         line2: "",
-        order: 0, // Initialize order value for new items
+        order: 0,
+        image: null,
+        imageUrl: "", // Store the base64 data URL here
     });
 
     useEffect(() => {
@@ -23,7 +27,6 @@ export default function MouldSlidePreview() {
                     if (snapshot.exists()) {
                         const dataObject = snapshot.val();
                         const dataArray = Object.values(dataObject);
-                        // Sort the array based on the 'order' value in ascending order
                         const sortedData = dataArray.sort((a, b) => a.order - b.order);
                         setData(sortedData);
                     }
@@ -41,19 +44,18 @@ export default function MouldSlidePreview() {
         setEditedData(data[index]);
     };
 
-    const handleSaveChanges = () => {
+    const handleSaveChanges = async () => {
         if (editIndex !== null) {
             const newData = [...data];
             newData[editIndex] = editedData;
 
-            set(ref(db, 'Home/MouldSlide'), newData)
-                .then(() => {
-                    console.log('Data updated successfully!');
-                    setEditIndex(null);
-                })
-                .catch((error) => {
-                    console.error('Error updating data:', error.message);
-                });
+            try {
+                await set(ref(db, 'Home/MouldSlide'), newData);
+                console.log('Data updated successfully!');
+                setEditIndex(null);
+            } catch (error) {
+                console.error('Error updating data:', error.message);
+            }
         }
     };
 
@@ -61,22 +63,77 @@ export default function MouldSlidePreview() {
         setIsNewItemModalOpen(true);
     };
 
-    const handleSaveNewItem = () => {
-        // Increment the order value for new items
-        newItemData.order = data.length > 0 ? data[data.length - 1].order + 1 : 0;
-        set(ref(db, 'Home/MouldSlide'), [...data, newItemData])
-            .then(() => {
+    const handleImageChange = (e) => {
+        // Handle image file change and set the state accordingly
+        const file = e.target.files[0];
+        if (file) {
+            setNewItemData({ ...newItemData, image: file });
+        }
+    };
+
+    const handleSaveNewItem = async () => {
+        try {
+            // Convert image to base64
+            if (newItemData.image) {
+                // Log to check if newItemData is defined
+                console.log('newItemData:', newItemData);
+
+                // Generate a unique filename (e.g., using timestamp)
+                const filename = `${Date.now()}_${newItemData.image.name}`;
+
+                // Log to check if filename is generated correctly
+                console.log('filename:', filename);
+
+                // Create a storage reference
+                console.log('filename:', filename);
+                const imageRef = storageRef(db, `images/${filename}`);
+
+                // Log to check if imageRef is created correctly
+                console.log('imageRef:', imageRef);
+
+                // Upload the image to Firebase Storage
+                await uploadBytes(imageRef, newItemData.image);
+
+                // Log to check if image is uploaded successfully
+                console.log('Image uploaded successfully!');
+
+                // Get the download URL of the uploaded image
+                const imageUrl = await getDownloadURL(imageRef);
+
+                // Log to check if imageUrl is retrieved correctly
+                console.log('imageUrl:', imageUrl);
+
+                // Create the data object to be stored in the database
+                const updatedItemData = {
+                    ...newItemData,
+                    imageUrl: imageUrl,
+                };
+
+                // Increment the order value for new items
+                updatedItemData.order = data.length > 0 ? data[data.length - 1].order + 1 : 0;
+
+                // Log to check if updatedItemData is correct
+                console.log('updatedItemData:', updatedItemData);
+
+                // Update the database with the new item data
+                const dbRef = ref(db, 'Home/MouldSlide');
+                push(dbRef, updatedItemData);
+
                 console.log('New item added successfully!');
+
+                // Reset newItemData and close the modal
                 setNewItemData({
                     line1: "",
                     line2: "",
                     order: 0,
+                    image: null,
+                    imageUrl: "",
                 });
                 setIsNewItemModalOpen(false);
-            })
-            .catch((error) => {
-                console.error('Error adding new item:', error.message);
-            });
+            }
+        } catch (error) {
+            console.error('Error adding new item:', error.message);
+        }
     };
 
     return (
@@ -92,22 +149,17 @@ export default function MouldSlidePreview() {
                             </div>
                         </div>
                     </div>
-                    {/* <div> */}
                     <div className="flex flex-wrap gap-x-12">
-
-                        {/* Display the data */}
                         {data.map((item, index) => (
                             <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-[#e9e9e9]' : 'bg-primary'}`}>
-                                <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-white'}`} >
-                                    <Icon icon={item.img} className='' />
+                                <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-white'}`}>
+                                    {item.imageUrl && <img src={item.image} alt={`Item ${index + 1}`} className="w-10 h-10 object-cover" />}
                                 </div>
                                 <p className="text-[14px] font-['ClashDisplay']">{item.line1}</p>
                                 <p className="text-[14px] font-['ClashDisplay']">{item.line2}</p>
                                 <p onClick={() => handleEdit(index)} className="cursor-pointer text-[20px] absolute -right-6 top-3"><Icon icon="typcn:edit" /></p>
                             </div>
                         ))}
-
-                        {/* Button to add a new item */}
                         <button onClick={handleAddNewItem} className="bg-primary h-[65px] w-[110px] text-white p-2 rounded-[20px] hover:bg-opacity-80">
                             Add New Item
                         </button>
@@ -172,6 +224,8 @@ export default function MouldSlidePreview() {
                                     line1: "",
                                     line2: "",
                                     order: 0,
+                                    image: null,
+                                    imageUrl: "",
                                 });
                                 setIsNewItemModalOpen(false);
                             }}
@@ -203,6 +257,20 @@ export default function MouldSlidePreview() {
                             onChange={(e) => setNewItemData({ ...newItemData, order: parseInt(e.target.value, 10) })}
                             className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:border-primary focus:ring focus:ring-primary"
                         />
+                        <label htmlFor="newItemImage">Image:</label>
+                        <input
+                            type="file"
+                            id="newItemImage"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:border-primary focus:ring focus:ring-primary"
+                        />
+                        {/* Display the image preview */}
+                        {newItemData.image && (
+                            <div className="mt-2">
+                                <img src={URL.createObjectURL(newItemData.image)} alt="New Item Preview" className="w-32 h-32 object-cover" />
+                            </div>
+                        )}
                         <button
                             onClick={handleSaveNewItem}
                             className="bg-primary text-white p-2 rounded-md hover:bg-opacity-80 focus:outline-none focus:ring focus:border-primary"

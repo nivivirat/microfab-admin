@@ -10,6 +10,7 @@ import QueryForm from './Components/QueryForm/QueryForm';
 import Who_are_we from './Components/WhoAreWe/WhoAreWe';
 import Analytics from './Components/Home/HomeComponents/Analytics/Analytics';
 import TurnKey from './Components/Home/HomeComponents/Turnkey/Turnkey';
+import MedicalDevices from './Components/MedicalDevices/MedicalDevices';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="/WhoAreWe" element={<Who_are_we />} />
             <Route path="/Analytics" element={<Analytics />} />
             <Route path="/HomeTurnKey" element={<TurnKey />} />
+            <Route path="/MedicalDevices" element={<MedicalDevices />} />
           </Routes>
         </div>
 
