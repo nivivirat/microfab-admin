@@ -37,8 +37,8 @@ export default function SideBar() {
                 ) : (
 
                     // side bar
-                    <div className="z-40 h-screen" onClick={() => { setIsOpen(false) }}>
-                        <div className="bg-base h-full z-50 p-3 w-[300px]">
+                    <div className="z-40 h-screen overflow-y-scroll" onClick={() => { setIsOpen(false) }}>
+                        <div className="bg-base h-full overflow-y-scroll z-50 p-3 w-[300px]">
                             <div className="flex flex-row justify-between">
                                 <img className='sm:h-[45px] sm:w-[90px] h-6 w-10' src={logo} alt='Logo' />
                                 <button className="text-primary text-3xl p-4" onClick={toggleSidebar} >
@@ -47,16 +47,17 @@ export default function SideBar() {
                             </div>
 
                             <div>
-                                <ul className='flex flex-col gap-5 mt-5'>
+                                <ul className='flex flex-col gap-5 mt-5 overflow-y-scroll'>
                                     <Nav title={"Home Banner"} destination={""} />
+                                    <Nav title={"Analytics"} destination={"Analytics"} />
                                     <Nav title={"Contact Us"} destination={"ContactUs"} />
-                                    <Nav title={"About Us"} destination={"AboutUs"} />
-                                    <Nav title={"Social Media"} destination={"SocialMedia"} />
-                                    <Nav title={"Testimonials"} destination={"Testimonials"} />
-                                    <Nav title={"Manufacturing Page"} destination={"ManufacturingPage"} />
                                     <Nav title={"Query Form"} destination={"QueryForm"} />
                                     <Nav title={"Who Are We"} destination={"WhoAreWe"} />
-                                    <Nav title={"Analytics"} destination={"Analytics"} />
+                                    <Nav title={"Testimonials"} destination={"Testimonials"} />
+                                    <Nav title={"About Us"} destination={"AboutUs"} />
+                                    <Nav title={"Manufacturing Page"} destination={"ManufacturingPage"} />
+                                    <Nav title={"Home TurnKey"} destination={"HomeTurnKey"} />
+                                    <Nav title={"Social Media"} destination={"SocialMedia"} />
                                 </ul>
                             </div>
                         </div>
