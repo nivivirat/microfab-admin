@@ -1,5 +1,6 @@
 import Graph from "./HomeComponents/Graph/Graph"
 import MouldSlidePreview from "./HomeComponents/MouldSlide/MouldSlideComponents/MouldSlidePreview"
+import WhyMicrofab from "./HomeComponents/WhyMicroFab/WhyMicroFab"
 
 export default function Home() {
     return (
@@ -7,6 +8,8 @@ export default function Home() {
             <MouldSlidePreview />
 
             <Graph />
+
+            <WhyMicrofab />
         </div>
     )
 }
