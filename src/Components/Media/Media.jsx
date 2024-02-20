@@ -106,24 +106,24 @@ const AdminPanel = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
       // Check if heading is empty or contains only whitespace
       if (!formData.heading.trim()) {
         alert('Please enter a heading.'); // You can replace this with a more user-friendly UI feedback
         return;
       }
-  
+
       let imgURL = formData.img;
-  
+
       if (imageFile) {
         const storageRef = storageFunctions.ref(`images/${imageFile.name}`);
         await storageFunctions.uploadBytes(storageRef, imageFile);
         imgURL = await storageFunctions.getDownloadURL(storageRef);
       }
-  
-      // ... existing code ...
-  
+
+      const timestamp  = Date.now(); // Get the server timestamp
+
       if (editingUid) {
         await database.set(`media/${editingUid}`, {
           img: imgURL,
@@ -131,6 +131,7 @@ const AdminPanel = () => {
           description: formData.description,
           routerlink: formData.routerlink,
           date: formData.date,
+          timestamp: timestamp, // Include the timestamp
         });
       } else {
         await database.push('media', {
@@ -139,9 +140,10 @@ const AdminPanel = () => {
           description: formData.description,
           routerlink: formData.routerlink,
           date: formData.date,
+          timestamp: timestamp, // Include the timestamp
         });
       }
-  
+
       alert('Media updated successfully! Please Refresh the page');
       setFormData({
         img: '',
@@ -158,7 +160,7 @@ const AdminPanel = () => {
       console.error('Error updating media:', error);
     }
   };
-  
+
   const handleCancelEdit1 = () => {
     setEditingUid1(null);
     setFormData1({
@@ -194,9 +196,7 @@ const AdminPanel = () => {
       return '/error'; // or any other fallback route
     }
   };
-  
-  
-  
+
   const handleImageChange1 = (e) => {
     const file = e.target.files[0];
     setImageFile1(file);
@@ -449,7 +449,7 @@ const AdminPanel = () => {
 
 
         <div>
-        {mediaData.slice().reverse().map((media) => (
+          {mediaData.slice().reverse().map((media) => (
             <div key={media.uid} style={{ border: '1px solid #013A98', padding: '20px', marginBottom: '20px', borderRadius: '10px', textAlign: 'left' }}>
               <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px' }}>Article : {media.heading}</p>
               <img src={media.img} alt={`Media ${media.uid}`} className='w-full h-[200px] object-contain' style={{ maxWidth: '100%', marginBottom: '10px', borderRadius: '5px' }} />
@@ -474,7 +474,7 @@ const AdminPanel = () => {
                     borderRadius: '5px',
                   }}
                 >
-                <Link to={generateRoute(media)}>Go to Your Route</Link>
+                  <Link to={generateRoute(media)}>Go to Your Route</Link>
 
 
                 </button>

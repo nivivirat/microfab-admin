@@ -1,6 +1,6 @@
 import Graph from "./HomeComponents/Graph/Graph"
 import MouldSlidePreview from "./HomeComponents/MouldSlide/MouldSlideComponents/MouldSlidePreview"
-import WhyMicrofab from "./HomeComponents/WhyMicroFab/WhyMicroFab"
+import WhyMicrofab from "./HomeComponents/WhyMicrofab/WhyMicrofab"
 
 export default function Home() {
     return (
