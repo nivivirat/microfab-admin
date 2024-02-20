@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { database } from './firebase';
+import { uploadImage } from './firebase';
 import { getDatabase, ref, set, onValue } from 'firebase/database';
+
 
 export default function MedicalDevices() {
     const [medicalDevicesData, setMedicalDevicesData] = useState({});
@@ -9,6 +10,7 @@ export default function MedicalDevices() {
     const [editedHeading, setEditedHeading] = useState('');
     const [editedContent, setEditedContent] = useState('');
     const [editedImg, setEditedImg] = useState('');
+    const [imageFile, setImageFile] = useState(null);
 
     const database = getDatabase();
 
@@ -34,20 +36,32 @@ export default function MedicalDevices() {
 
     const handleSave = async (deviceKey) => {
         try {
+            // Upload the image file and get the download URL
+            const newImgURL = imageFile ? await uploadImage(imageFile, `medicalDevices/${deviceKey}/img`) : editedImg;
+
+            // Update the data in the database
+            console.log(newImgURL);
             await set(ref(database, `MedicalDevices/${deviceKey}`), {
                 order: editedOrder,
                 heading: editedHeading,
                 content: editedContent,
-                img: editedImg,
+                img: newImgURL, // Use the new download URL
             });
 
-            console.log(`Saving edited content for ${deviceKey}: Order: ${editedOrder}, Heading: ${editedHeading}, Content: ${editedContent}, Img: ${editedImg}`);
+            console.log(`Saving edited content for ${deviceKey}: Order: ${editedOrder}, Heading: ${editedHeading}, Content: ${editedContent}, Img: ${newImgURL}`);
 
             setEditItem(null);
+            setImageFile(null); // Reset the image file after save
         } catch (error) {
             console.error('Error saving data:', error.message);
             // Handle error, show user feedback, etc.
         }
+    };
+
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setImageFile(file);
     };
 
     return (
@@ -71,7 +85,21 @@ export default function MedicalDevices() {
                                 <td className="py-2 px-4 border-b">{editItem === deviceKey ? <input type="text" value={editedOrder} onChange={(e) => setEditedOrder(e.target.value)} className="w-full border p-2" /> : medicalDevicesData[deviceKey].order}</td>
                                 <td className="py-2 px-4 border-b h-[250px]">{editItem === deviceKey ? <input type="text" value={editedHeading} onChange={(e) => setEditedHeading(e.target.value)} className="w-full border p-2" /> : medicalDevicesData[deviceKey].heading}</td>
                                 <td className="py-2 px-4 border-b">{editItem === deviceKey ? <textarea value={editedContent} onChange={(e) => setEditedContent(e.target.value)} className="w-full border p-2 h-[250px]" /> : medicalDevicesData[deviceKey].content}</td>
-                                <td className="py-2 px-4 border-b">{editItem === deviceKey ? <input type="text" value={editedImg} onChange={(e) => setEditedImg(e.target.value)} className="w-full border p-2" /> : <img src={medicalDevicesData[deviceKey].img} alt={medicalDevicesData[deviceKey].heading} className="w-16 h-16 object-cover rounded" />}</td>
+                                <td className="py-2 px-4 border-b">
+                                    {editItem === deviceKey ? (
+                                        <div>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageChange}
+                                                className="mb-2"
+                                            />
+                                            {imageFile && <img src={URL.createObjectURL(imageFile)} alt="Preview" className="w-[200px] h-[230px] object-cover rounded mb-2" />}
+                                        </div>
+                                    ) : (
+                                        <img src={medicalDevicesData[deviceKey].img} alt={medicalDevicesData[deviceKey].heading} className="w-[200px] h-[230px] object-cover rounded" />
+                                    )}
+                                </td>
                                 <td className="py-2 px-4 border-b">
                                     {editItem === deviceKey ? (
                                         <button onClick={() => handleSave(deviceKey)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">

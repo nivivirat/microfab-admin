@@ -1,7 +1,5 @@
-// firebase.js
-
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref as databaseRef, set, remove, push, get, ref } from 'firebase/database';
+import { getDatabase, ref as databaseRef, set, remove, push, get, child } from 'firebase/database';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -14,7 +12,6 @@ const firebaseConfig = {
   appId: "1:949509913271:web:7fba49e66f7a592ce2ab32",
   measurementId: "G-B1KM0RLBQN",
 };
-  
 
 const app = initializeApp(firebaseConfig);
 
@@ -31,6 +28,10 @@ const storageFunctions = {
   getDownloadURL: async (ref) => getDownloadURL(ref),
 };
 
-export { app, database, storageFunctions,getDatabase, ref };
+export const uploadImage = async (file, path) => {
+  const storageRef = storageFunctions.ref(path);
+  const snapshot = await uploadBytes(storageRef, file);
+  return getDownloadURL(snapshot.ref);
+};
 
-
+export { app, database, storageFunctions };

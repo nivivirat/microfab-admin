@@ -47,7 +47,7 @@ export default function SideBar() {
                             </div>
 
                             <div>
-                                <ul className='flex flex-col gap-5 mt-5 overflow-y-scroll'>
+                                <ul className='flex flex-col gap-2 mt-5 overflow-y-scroll'>
                                     <Nav title={"Home Banner"} destination={""} />
                                     <Nav title={"Analytics"} destination={"Analytics"} />
                                     <Nav title={"Contact Us"} destination={"ContactUs"} />
