@@ -11,6 +11,8 @@ import Who_are_we from './Components/WhoAreWe/WhoAreWe';
 import Analytics from './Components/Home/HomeComponents/Analytics/Analytics';
 import TurnKey from './Components/Home/HomeComponents/Turnkey/Turnkey';
 import MedicalDevices from './Components/MedicalDevices/MedicalDevices';
+import SingleFileUpload from './Components/Media/SingleFileUpload';
+import Media from './Components/Media/Media';
 
 function App() {
   return (
@@ -33,6 +35,8 @@ function App() {
             <Route path="/Analytics" element={<Analytics />} />
             <Route path="/HomeTurnKey" element={<TurnKey />} />
             <Route path="/MedicalDevices" element={<MedicalDevices />} />
+            <Route path="/media/:id/:heading" element={<SingleFileUpload />} />
+            <Route path="/media" element={<Media />} />
           </Routes>
         </div>
 

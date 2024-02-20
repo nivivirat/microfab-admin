@@ -59,6 +59,7 @@ export default function SideBar() {
                                     <Nav title={"Home TurnKey"} destination={"HomeTurnKey"} />
                                     <Nav title={"Social Media"} destination={"SocialMedia"} />
                                     <Nav title={"Medical Devices"} destination={"MedicalDevices"} />
+                                    <Nav title={"Articles"} destination={"Media"} />
                                 </ul>
                             </div>
                         </div>
