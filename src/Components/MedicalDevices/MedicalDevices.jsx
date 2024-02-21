@@ -66,13 +66,14 @@ export default function MedicalDevices() {
             const newDeviceKey = newDeviceRef.key;
 
             await set(newDeviceRef, {
-                order: editedOrder,
-                heading: editedHeading,
-                content: editedContent,
+                order: '0', // Set order as 1
+                heading: '',
+                content: '', // Set content as an empty string
                 img: newImgURL,
             });
 
-            console.log(`Adding new content: Order: ${editedOrder}, Heading: ${editedHeading}, Content: ${editedContent}, Img: ${newImgURL}`);
+            console.log(`Adding new content: Order: 1, Heading: ${editedHeading}, Content: '', Img: ${newImgURL}`);
+            alert('New card added with empty content and order 0 : Edit your content');
             setImageFile(null); // Reset the image file after save
         } catch (error) {
             console.error('Error adding new data:', error.message);
