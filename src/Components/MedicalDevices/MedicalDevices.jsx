@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { uploadImage } from './firebase';
-import { getDatabase, ref, set, onValue } from 'firebase/database';
-
+import { getDatabase, ref, set, onValue, push } from 'firebase/database';
 
 export default function MedicalDevices() {
     const [medicalDevicesData, setMedicalDevicesData] = useState({});
@@ -40,7 +39,6 @@ export default function MedicalDevices() {
             const newImgURL = imageFile ? await uploadImage(imageFile, `medicalDevices/${deviceKey}/img`) : editedImg;
 
             // Update the data in the database
-            console.log(newImgURL);
             await set(ref(database, `MedicalDevices/${deviceKey}`), {
                 order: editedOrder,
                 heading: editedHeading,
@@ -58,15 +56,64 @@ export default function MedicalDevices() {
         }
     };
 
+    const handleAddNew = async () => {
+        try {
+            // Upload the image file and get the download URL
+            const newImgURL = imageFile ? await uploadImage(imageFile, `medicalDevices/new/img`) : '';
+
+            // Push new data to the database
+            const newDeviceRef = push(ref(database, 'MedicalDevices'));
+            const newDeviceKey = newDeviceRef.key;
+
+            await set(newDeviceRef, {
+                order: editedOrder,
+                heading: editedHeading,
+                content: editedContent,
+                img: newImgURL,
+            });
+
+            console.log(`Adding new content: Order: ${editedOrder}, Heading: ${editedHeading}, Content: ${editedContent}, Img: ${newImgURL}`);
+            setImageFile(null); // Reset the image file after save
+        } catch (error) {
+            console.error('Error adding new data:', error.message);
+            // Handle error, show user feedback, etc.
+        }
+    };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         setImageFile(file);
     };
 
+    const handleDelete = async (deviceKey) => {
+        // Use window.confirm to show a browser-level confirmation dialog
+        const confirmed = window.confirm("Are you sure you want to delete this item?");
+
+        if (!confirmed) {
+            // If the user cancels the deletion, return early
+            return;
+        }
+
+        try {
+            // Delete the data from the database
+            await set(ref(database, `MedicalDevices/${deviceKey}`), null);
+            console.log(`Deleting content for ${deviceKey}`);
+        } catch (error) {
+            console.error('Error deleting data:', error.message);
+            // Handle error, show user feedback, etc.
+        }
+    };
+
     return (
         <div className="container mx-auto my-8">
-            <h1 className="text-3xl font-bold mb-4">Medical Devices</h1>
+            <div className='flex justify-between my-5 flex-row place-items-center'>
+                <h1 className="text-3xl font-bold mt-5">Medical Devices</h1>
+                <div className="mt-4">
+                    <button onClick={handleAddNew} className="bg-green-500 text-white px-2 py-1 rounded mr-2">
+                        Add New
+                    </button>
+                </div>
+            </div>
             <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
                 <thead className="bg-gray-800 text-white">
                     <tr>
@@ -102,13 +149,23 @@ export default function MedicalDevices() {
                                 </td>
                                 <td className="py-2 px-4 border-b">
                                     {editItem === deviceKey ? (
-                                        <button onClick={() => handleSave(deviceKey)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">
-                                            Save
-                                        </button>
+                                        <div>
+                                            <button onClick={() => handleSave(deviceKey)} className="bg-blue-500 w-[70px] mb-5 text-white px-2 py-1 rounded mr-2">
+                                                Save
+                                            </button>
+                                            <button onClick={() => setEditItem(null)} className="bg-gray-500 w-[70px] text-white px-2 py-1 rounded">
+                                                Cancel
+                                            </button>
+                                        </div>
                                     ) : (
-                                        <button onClick={() => handleEdit(deviceKey)} className="bg-green-500 text-white px-2 py-1 rounded mr-2">
-                                            Edit
-                                        </button>
+                                        <>
+                                            <button onClick={() => handleEdit(deviceKey)} className="bg-green-500 text-white px-2 py-1 w-[70px] mb-5 rounded mr-2">
+                                                Edit
+                                            </button>
+                                            <button onClick={() => handleDelete(deviceKey)} className="bg-red-500 text-white px-2 py-1 w-[70px] rounded">
+                                                Delete
+                                            </button>
+                                        </>
                                     )}
                                 </td>
                             </tr>
