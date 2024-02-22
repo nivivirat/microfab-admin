@@ -165,7 +165,7 @@ export default function MedicalDevices() {
                                             </button>
                                             <button onClick={() => handleDelete(deviceKey)} className="bg-red-500 text-white px-2 py-1 w-[70px] rounded">
                                                 Delete
-                                            </button>
+                                            </button> 
                                         </>
                                     )}
                                 </td>

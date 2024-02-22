@@ -1,36 +1,44 @@
 import { useState, useEffect } from "react";
 import MouldSlide from "../MouldSlide";
 import { onValue, ref, set } from "firebase/database";
-import { db } from "../../../../../../firebase";
+import { db, storage } from "../../../../../../firebase";
+import { uploadImage } from '../../../../MedicalDevices/firebase'; // Adjust the import based on your actual file structure
 import { Icon } from "@iconify/react";
-import { push } from "firebase/database";
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "firebase/storage";
 
 export default function MouldSlidePreview() {
-    const [data, setData] = useState([]);
+    const [topData, setTopData] = useState([]);
+    const [middleData, setMiddleData] = useState([]);
+    const [bottomData, setBottomData] = useState([]);
     const [editIndex, setEditIndex] = useState(null);
     const [editedData, setEditedData] = useState({});
-    const [isNewItemModalOpen, setIsNewItemModalOpen] = useState(false);
-    const [newItemData, setNewItemData] = useState({
-        line1: "",
-        line2: "",
-        order: 0,
-        image: null,
-        imageUrl: "", // Store the base64 data URL here
-    });
+    const [imageFile, setImageFile] = useState(null);
+    const [section, setSection] = useState("");
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const dataRef = ref(db, 'Home/MouldSlide');
-                onValue(dataRef, (snapshot) => {
-                    if (snapshot.exists()) {
-                        const dataObject = snapshot.val();
-                        const dataArray = Object.values(dataObject);
-                        const sortedData = dataArray.sort((a, b) => a.order - b.order);
-                        setData(sortedData);
-                    }
-                });
+                const topDataRef = ref(db, 'Home/MouldSlide/top');
+                const middleDataRef = ref(db, 'Home/MouldSlide/middle');
+                const bottomDataRef = ref(db, 'Home/MouldSlide/bottom');
+
+                const fetchSectionData = async (sectionPath, setData) => {
+                    const sectionDataRef = ref(db, sectionPath);
+                    onValue(sectionDataRef, (snapshot) => {
+                        if (snapshot.exists()) {
+                            const dataObject = snapshot.val();
+                            const dataArray = Object.values(dataObject);
+                            const sortedData = dataArray.sort((a, b) => a.order - b.order);
+                            setData(sortedData);
+                        }
+                    });
+                };
+
+                await Promise.all([
+                    fetchSectionData('Home/MouldSlide/top', setTopData),
+                    fetchSectionData('Home/MouldSlide/middle', setMiddleData),
+                    fetchSectionData('Home/MouldSlide/bottom', setBottomData),
+                ]);
             } catch (error) {
                 console.error('Error fetching data from Firebase:', error.message);
             }
@@ -39,100 +47,69 @@ export default function MouldSlidePreview() {
         fetchData();
     }, []);
 
-    const handleEdit = (index) => {
-        setEditIndex(index);
+    const handleEdit = (index, type) => {
+        setEditIndex({ index, type });
+        const data = type === 'top' ? topData : type === 'middle' ? middleData : bottomData;
         setEditedData(data[index]);
+        setSection(type);
     };
 
     const handleSaveChanges = async () => {
         if (editIndex !== null) {
-            const newData = [...data];
-            newData[editIndex] = editedData;
+            const { index, type } = editIndex;
+            const dataToUpdate = type === 'top' ? [...topData] : type === 'middle' ? [...middleData] : [...bottomData];
+
+            // Check if a new image is selected
+            const newImgURL = imageFile ? await uploadImage(imageFile, 'Home/MouldSlide', type) : editedData.imageUrl;
+
+            // Update the data
+            dataToUpdate[index] = { ...editedData, imageUrl: newImgURL };
 
             try {
-                await set(ref(db, 'Home/MouldSlide'), newData);
+                const dbRef = ref(db, `Home/MouldSlide/${type}`);
+                await set(dbRef, dataToUpdate);
                 console.log('Data updated successfully!');
                 setEditIndex(null);
+                setImageFile(null); // Reset the image file after save
             } catch (error) {
                 console.error('Error updating data:', error.message);
             }
         }
     };
 
-    const handleAddNewItem = () => {
-        setIsNewItemModalOpen(true);
-    };
-
-    const handleImageChange = (e) => {
-        // Handle image file change and set the state accordingly
-        const file = e.target.files[0];
-        if (file) {
-            setNewItemData({ ...newItemData, image: file });
-        }
-    };
-
-    const handleSaveNewItem = async () => {
+    const handleImageUpload = async (file, index) => {
         try {
-            // Convert image to base64
-            if (newItemData.image) {
-                // Log to check if newItemData is defined
-                console.log('newItemData:', newItemData);
+            // Generate a unique filename based on timestamp, type, and item index
+            const timestamp = Date.now();
+            const fileName = `${section}_${index.index}_${timestamp}_${file.name}`;
 
-                // Generate a unique filename (e.g., using timestamp)
-                const filename = `${Date.now()}_${newItemData.image.name}`;
+            // Create a storage reference with the specified filename
+            const storageReference = storageRef(storage, `Home/Mould/${section}/${fileName}`);
 
-                // Log to check if filename is generated correctly
-                console.log('filename:', filename);
+            // Convert the file to a Data URL
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
 
-                // Create a storage reference
-                console.log('filename:', filename);
-                const imageRef = storageRef(db, `images/${filename}`);
+            reader.onload = async () => {
+                const dataURL = reader.result;
 
-                // Log to check if imageRef is created correctly
-                console.log('imageRef:', imageRef);
-
-                // Upload the image to Firebase Storage
-                await uploadBytes(imageRef, newItemData.image);
-
-                // Log to check if image is uploaded successfully
-                console.log('Image uploaded successfully!');
+                // Upload the Data URL to the specified storage reference
+                await uploadString(storageReference, dataURL, 'data_url');
 
                 // Get the download URL of the uploaded image
-                const imageUrl = await getDownloadURL(imageRef);
+                getDownloadURL(storageReference)
+                    .then((imageUrl) => {
+                        // Update the state with the new imageUrl
+                        setEditedData({ ...editedData, imageUrl });
 
-                // Log to check if imageUrl is retrieved correctly
-                console.log('imageUrl:', imageUrl);
-
-                // Create the data object to be stored in the database
-                const updatedItemData = {
-                    ...newItemData,
-                    imageUrl: imageUrl,
-                };
-
-                // Increment the order value for new items
-                updatedItemData.order = data.length > 0 ? data[data.length - 1].order + 1 : 0;
-
-                // Log to check if updatedItemData is correct
-                console.log('updatedItemData:', updatedItemData);
-
-                // Update the database with the new item data
-                const dbRef = ref(db, 'Home/MouldSlide');
-                push(dbRef, updatedItemData);
-
-                console.log('New item added successfully!');
-
-                // Reset newItemData and close the modal
-                setNewItemData({
-                    line1: "",
-                    line2: "",
-                    order: 0,
-                    image: null,
-                    imageUrl: "",
-                });
-                setIsNewItemModalOpen(false);
-            }
+                        alert("image uploaded successfully")
+                    })
+                    .catch((error) => {
+                        console.error('Error getting download URL:', error.message);
+                    });
+            };
         } catch (error) {
-            console.error('Error adding new item:', error.message);
+            console.error('Error uploading image:', error.message);
         }
     };
 
@@ -145,32 +122,53 @@ export default function MouldSlidePreview() {
                     <div className="md:w-3/12 w-full md:mt-[10px] md:h-full">
                         <div className="w-full md:h-[40%] h-[200px] md:m-0 m-4 mt-0 flex flex-row gap-3">
                             <div className="w-[50%] h-[200%] md:mr-0 mr-3">
-                                <MouldSlide data={data} />
+                                <MouldSlide />
                             </div>
                         </div>
                     </div>
                     <div className="flex flex-wrap gap-x-12">
-                        {data.map((item, index) => (
-                            <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-[#e9e9e9]' : 'bg-primary'}`}>
-                                <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-white'}`}>
-                                    {item.imageUrl && <img src={item.image} alt={`Item ${index + 1}`} className="w-10 h-10 object-cover" />}
+                        {topData.map((item, index) => (
+                            <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-[#b9c7c9]' : 'bg-primary'}`}>
+                                <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-[#b9c7c9]'}`}>
+                                    {/* Display content for top section */}
+                                    {item.imageUrl && <img src={item.imageUrl} alt={`${index + 1}`} className="py-1 pt-3 w-10 h-10 object-contain" />}
                                 </div>
-                                <p className="text-[14px] font-['ClashDisplay']">{item.line1}</p>
+                                <p className="text-[14px] font-['ClashDisplay'] mt-2">{item.line1}</p>
                                 <p className="text-[14px] font-['ClashDisplay']">{item.line2}</p>
-                                <p onClick={() => handleEdit(index)} className="cursor-pointer text-[20px] absolute -right-6 top-3"><Icon icon="typcn:edit" /></p>
+                                <p onClick={() => handleEdit(index, 'top')} className="cursor-pointer text-[20px] absolute -right-6 top-3"><Icon icon="typcn:edit" /></p>
                             </div>
                         ))}
-                        <button onClick={handleAddNewItem} className="bg-primary h-[65px] w-[110px] text-white p-2 rounded-[20px] hover:bg-opacity-80">
-                            Add New Item
-                        </button>
+                        {middleData.map((item, index) => (
+                            <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-white' : 'bg-primary'}`}>
+                                <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-white'}`}>
+                                    {/* Display content for middle section */}
+                                    {item.imageUrl && <img src={item.imageUrl} alt={`${index + 1}`} className="py-1 pt-3 w-10 h-10 object-contain" />}
+                                </div>
+                                <p className="text-[14px] font-['ClashDisplay'] mt-2">{item.line1}</p>
+                                <p className="text-[14px] font-['ClashDisplay']">{item.line2}</p>
+                                <p onClick={() => handleEdit(index, 'middle')} className="cursor-pointer text-[20px] absolute -right-6 top-3"><Icon icon="typcn:edit" /></p>
+                            </div>
+                        ))}
+                        {bottomData.map((item, index) => (
+                            <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-[#b9c7c9]' : 'bg-primary'}`}>
+                                <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-[#b9c7c9]'}`}>
+                                    {/* Display content for bottom section */}
+                                    {item.imageUrl && <img src={item.imageUrl} alt={`${index + 1}`} className="py-1 pt-3 w-10 h-10 object-contain" />}
+                                </div>
+                                <p className="text-[14px] font-['ClashDisplay'] mt-2">{item.line1}</p>
+                                <p className="text-[14px] font-['ClashDisplay']">{item.line2}</p>
+                                <p onClick={() => handleEdit(index, 'bottom')} className="cursor-pointer text-[20px] absolute -right-6 top-3"><Icon icon="typcn:edit" /></p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
 
             {/* Modal for editing */}
             {editIndex !== null && (
-                <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50">
-                    <div className="bg-white p-6 rounded relative">
+                <div className="fixed top-0 z-50 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg relative w-96">
+                        <h1 className="font-bold text-[20px]">Edit Mould Slide Content</h1>
                         <button
                             onClick={() => {
                                 setEditIndex(null);
@@ -178,9 +176,10 @@ export default function MouldSlidePreview() {
                             }}
                             className="absolute top-2 right-2 text-gray-600 hover:text-gray-800 cursor-pointer"
                         >
-                            X
+                            <span className="text-xl">&#10005;</span>
                         </button>
-                        <label htmlFor="editedLine1">Line 1:</label>
+                        {/* Render form inputs based on type (top, middle, bottom) */}
+                        <label htmlFor="editedLine1" className="block text-sm font-semibold mt-4">Line 1:</label>
                         <input
                             type="text"
                             id="editedLine1"
@@ -188,7 +187,7 @@ export default function MouldSlidePreview() {
                             onChange={(e) => setEditedData({ ...editedData, line1: e.target.value })}
                             className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:border-primary focus:ring focus:ring-primary"
                         />
-                        <label htmlFor="editedLine2">Line 2:</label>
+                        <label htmlFor="editedLine2" className="block text-sm font-semibold mt-4">Line 2:</label>
                         <input
                             type="text"
                             id="editedLine2"
@@ -196,17 +195,16 @@ export default function MouldSlidePreview() {
                             onChange={(e) => setEditedData({ ...editedData, line2: e.target.value })}
                             className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:border-primary focus:ring focus:ring-primary"
                         />
-                        <label htmlFor="editedOrder">Order:</label>
+                        <label htmlFor="editedImage" className="block text-sm font-semibold mt-4">Image:</label><span className="text-red">The image must have no-background</span><br></br><span>Image dimension </span>
                         <input
-                            type="number"
-                            id="editedOrder"
-                            value={editedData.order}
-                            onChange={(e) => setEditedData({ ...editedData, order: parseInt(e.target.value, 10) })}
+                            type="file"
+                            id="editedImage"
+                            onChange={(e) => handleImageUpload(e.target.files[0], editIndex)}
                             className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:border-primary focus:ring focus:ring-primary"
                         />
                         <button
                             onClick={handleSaveChanges}
-                            className="bg-primary text-white p-2 rounded-md hover:bg-opacity-80 focus:outline-none focus:ring focus:border-primary"
+                            className="mt-6 bg-primary text-white p-2 rounded-md hover:bg-opacity-80 focus:outline-none focus:ring focus:border-primary"
                         >
                             Save Changes
                         </button>
@@ -214,72 +212,6 @@ export default function MouldSlidePreview() {
                 </div>
             )}
 
-            {/* Modal for adding a new item */}
-            {isNewItemModalOpen && (
-                <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50">
-                    <div className="bg-white p-6 rounded relative">
-                        <button
-                            onClick={() => {
-                                setNewItemData({
-                                    line1: "",
-                                    line2: "",
-                                    order: 0,
-                                    image: null,
-                                    imageUrl: "",
-                                });
-                                setIsNewItemModalOpen(false);
-                            }}
-                            className="absolute top-2 right-2 text-gray-600 hover:text-gray-800 cursor-pointer"
-                        >
-                            X
-                        </button>
-                        <label htmlFor="newItemLine1">Line 1:</label>
-                        <input
-                            type="text"
-                            id="newItemLine1"
-                            value={newItemData.line1}
-                            onChange={(e) => setNewItemData({ ...newItemData, line1: e.target.value })}
-                            className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:border-primary focus:ring focus:ring-primary"
-                        />
-                        <label htmlFor="newItemLine2">Line 2:</label>
-                        <input
-                            type="text"
-                            id="newItemLine2"
-                            value={newItemData.line2}
-                            onChange={(e) => setNewItemData({ ...newItemData, line2: e.target.value })}
-                            className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:border-primary focus:ring focus:ring-primary"
-                        />
-                        <label htmlFor="newItemOrder">Order:</label>
-                        <input
-                            type="number"
-                            id="newItemOrder"
-                            value={newItemData.order}
-                            onChange={(e) => setNewItemData({ ...newItemData, order: parseInt(e.target.value, 10) })}
-                            className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:border-primary focus:ring focus:ring-primary"
-                        />
-                        <label htmlFor="newItemImage">Image:</label>
-                        <input
-                            type="file"
-                            id="newItemImage"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:border-primary focus:ring focus:ring-primary"
-                        />
-                        {/* Display the image preview */}
-                        {newItemData.image && (
-                            <div className="mt-2">
-                                <img src={URL.createObjectURL(newItemData.image)} alt="New Item Preview" className="w-32 h-32 object-cover" />
-                            </div>
-                        )}
-                        <button
-                            onClick={handleSaveNewItem}
-                            className="bg-primary text-white p-2 rounded-md hover:bg-opacity-80 focus:outline-none focus:ring focus:border-primary"
-                        >
-                            Save New Item
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
