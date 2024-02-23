@@ -15,6 +15,8 @@ export default function MouldSlidePreview() {
     const [imageFile, setImageFile] = useState(null);
     const [section, setSection] = useState("");
 
+    const [loading, setLoading] = useState(false);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -79,6 +81,8 @@ export default function MouldSlidePreview() {
 
     const handleImageUpload = async (file, index) => {
         try {
+
+            setLoading(true);
             // Generate a unique filename based on timestamp, type, and item index
             const timestamp = Date.now();
             const fileName = `${section}_${index.index}_${timestamp}_${file.name}`;
@@ -107,6 +111,14 @@ export default function MouldSlidePreview() {
                     .catch((error) => {
                         console.error('Error getting download URL:', error.message);
                     });
+
+                const timerId = setTimeout(() => {
+                    setLoading(false);
+                }, 2000);
+
+                // Cleanup the timer to avoid memory leaks
+                return () => clearTimeout(timerId);
+
             };
         } catch (error) {
             console.error('Error uploading image:', error.message);
@@ -126,7 +138,7 @@ export default function MouldSlidePreview() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex flex-wrap gap-x-12">
+                    <div className="flex flex-wrap gap-x-24">
                         {topData.map((item, index) => (
                             <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-[#b9c7c9]' : 'bg-primary'}`}>
                                 <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-[#b9c7c9]'}`}>
@@ -139,7 +151,7 @@ export default function MouldSlidePreview() {
                             </div>
                         ))}
                         {middleData.map((item, index) => (
-                            <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-white' : 'bg-primary'}`}>
+                            <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-white border border-primary' : 'bg-primary'}`}>
                                 <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-white'}`}>
                                     {/* Display content for middle section */}
                                     {item.imageUrl && <img src={item.imageUrl} alt={`${index + 1}`} className="py-1 pt-3 w-10 h-10 object-contain" />}
@@ -204,7 +216,8 @@ export default function MouldSlidePreview() {
                         />
                         <button
                             onClick={handleSaveChanges}
-                            className="mt-6 bg-primary text-white p-2 rounded-md hover:bg-opacity-80 focus:outline-none focus:ring focus:border-primary"
+                            className={`mt-6 bg-primary text-white p-2 rounded-md hover:bg-opacity-80 focus:outline-none focus:ring focus:border-primary ${loading ? 'cursor-wait opacity-50' : '' // Disable pointer events and reduce opacity when loading
+                                }`}
                         >
                             Save Changes
                         </button>

@@ -46,9 +46,9 @@ export default function MouldSlide() {
     fetchData('bottom');
   }, []);
 
-  topData = [...topData, ...topData];
-  middleData = [...middleData, ...middleData];
-  bottomData = [...bottomData, ...bottomData];
+  topData = [...topData, ...topData, ...topData];
+  middleData = [...middleData, ...middleData , ...middleData];
+  bottomData = [...bottomData, ...bottomData, ...bottomData];
 
   return (
     <div className="font-['ClashDisplay'] w-[90%] h-[94%] flex flex-col justify-between rounded-[20px] bg-[#E9E9E9] md:mr-2 mr-14 mt-[8px]">
