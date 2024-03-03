@@ -1,17 +1,21 @@
+import { get, push, ref, refFromURL, set } from 'firebase/database';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { db } from '../../../firebase';
-import { ref, get, push, set } from 'firebase/database';
-import { useEffect, useState } from 'react';
-import EditForm from './ProductComponents/EditForm'
-import EditFormArray from './ProductComponents/EditFormArray'
+import EditForm from './ProductComponents/EditForm';
+import EditFormArray from './ProductComponents/EditFormArray';
+import { storageFunctions } from './firebase';
 
 export default function SingleProduct() {
 
     const [data, setData] = useState(null);
     const [editingIndex, setEditingIndex] = useState(null);
     const { id } = useParams();
+    const [imageFile, setImageFile] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const initialData = {
+        bannerImg: "",
         advantages: [
             { heading: "", content: "" },
             { heading: "", content: "" },
@@ -26,7 +30,6 @@ export default function SingleProduct() {
             { heading: "", content: "", img: "" },
             // Add more empty entries as needed
         ],
-        bannerImg: "",
         introduction: {
             content: "",
             intro: "Introducing the Technology",
@@ -40,18 +43,6 @@ export default function SingleProduct() {
             topl: "",
             topr: "",
         },
-    };
-
-    const createNewChild = () => {
-        // Generate a new unique key using push
-        const newChildRef = push(ref(db, 'ProductContent'));
-        const newChildKey = newChildRef.key;
-
-        // Log the newly generated key
-        console.log("New Child Key:", newChildKey);
-
-        // Set the initial data for the new child
-        set(ref(db, `ProductContent/${newChildKey}`), initialData);
     };
 
     useEffect(() => {
@@ -143,11 +134,80 @@ export default function SingleProduct() {
         setData(newData);
     };
 
+    const handleImageChange = async (e) => {
+        const file = e.target.files[0];
+        setImageFile(file);
+
+        // Check if a file is selected
+        if (!file) {
+            return;
+        }
+
+        // Show loading screen
+        setLoading(true);
+
+        try {
+            const storageRef = storageFunctions.ref(`images/${file.name}`);
+            await storageFunctions.uploadBytes(storageRef, file);
+            const imgURL = await storageFunctions.getDownloadURL(storageRef);
+
+            const newData = { ...data }
+            newData.bannerImg = imgURL || "";
+
+            console.log(imgURL);
+
+            setData(newData);
+
+            // Update the data in the database
+            const databaseRef = ref(db, `ProductContent/${id}`);
+            await set(databaseRef, newData);
+
+            console.log("Data successfully saved to the database");
+            alert("Success");
+        } catch (error) {
+            console.error("Error saving data to the database:", error);
+            alert("Error uploading image");
+        } finally {
+            // Hide loading screen
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (<div>
+            Loading
+        </div>)
+    }
+
+
     return (
         <div className="container mx-auto p-4 mb-10">
 
             {data ? (
                 <div className="mt-4">
+
+                    <h4 className="mt-8 mb-4 text-2xl font-semibold text-primary border-b-2 border-primary pb-2">
+                        Banner Image
+                    </h4>
+                    <div>
+                        <label htmlFor="image" className="block text-gray-700 text-sm font-bold mb-2">
+                            Image
+                        </label>
+
+                        <div className='flex flex-row'>
+                            <div className='mr-10'>
+                                <h6>Please provide same dimension of all images in this section preferrably (500 * 500)</h6>
+                                <input
+                                    type="file"
+                                    id="image"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    className="w-full border rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                                />
+                            </div>
+                            <img src={data?.bannerImg} className='w-[40vw]'></img>
+                        </div>
+                    </div>
 
                     <h4 className="mt-8 mb-4 text-2xl font-semibold text-primary border-b-2 border-primary pb-2">
                         Top
