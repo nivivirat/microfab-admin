@@ -32,9 +32,9 @@ export default function SingleProduct() {
             intro: "Introducing the Technology",
         },
         process: [
-            { process: "", content: "" },
-            { process: "", content: "" },
-            { process: "", content: "" },
+            { heading: "", content: "" },
+            { heading: "", content: "" },
+            { heading: "", content: "" },
         ],
         top: {
             topl: "",
@@ -137,7 +137,7 @@ export default function SingleProduct() {
         newData.process = newData.process || [];
 
         // Add a new empty process entry
-        newData.process.push({ process: "", content: "" });
+        newData.process.push({ heading: "", content: "" });
 
         // Update the data state
         setData(newData);
@@ -246,42 +246,29 @@ export default function SingleProduct() {
                             <tbody>
                                 {data.process.map((item, index) => (
                                     <tr key={index} className="border-t">
+                                        <td className="py-2 px-4">{item.heading}</td>
+                                        <td className="py-2 px-4">{item.content}</td>
                                         <td className="py-2 px-4">
                                             {editingIndex && editingIndex.section === 'process' && editingIndex.index === index ? (
                                                 <EditFormArray
                                                     section="process"
                                                     index={index}
-                                                    heading={item.process}
+                                                    heading={item.heading}
                                                     content={item.content}
                                                     onSave={handleUpdate}
                                                     onCancel={handleCancelEdit}
                                                 />
+
                                             ) : (
-                                                item.process
+                                                <button
+                                                    className="bg-primary  text-white font-bold py-1 px-2 ml-2 rounded"
+                                                    onClick={() => handleEdit('process', index)}
+                                                >
+                                                    Edit
+                                                </button>
                                             )}
                                         </td>
-                                        <td className="py-2 px-4">
-                                            {editingIndex && editingIndex.section === 'process' && editingIndex.index === index ? (
-                                                <EditFormArray
-                                                    section="process"
-                                                    index={index}
-                                                    heading={item.process}
-                                                    content={item.content}
-                                                    onSave={handleUpdate}
-                                                    onCancel={handleCancelEdit}
-                                                />
-                                            ) : (
-                                                item.content
-                                            )}
-                                        </td>
-                                        <td className="py-2 px-4">
-                                            <button
-                                                className="bg-primary  text-white font-bold py-1 px-2 ml-2 rounded"
-                                                onClick={() => handleEdit('process', index)}
-                                            >
-                                                Edit
-                                            </button>
-                                        </td>
+
                                     </tr>
                                 ))}
                             </tbody>
@@ -314,41 +301,26 @@ export default function SingleProduct() {
                                 {data.advantages.map((item, index) => (
                                     <tr key={index} className="border-t">
                                         <td className="py-2 px-4">{index + 1}</td>
+                                        <td className="py-2 px-4">{item.heading}</td>
+                                        <td className="py-2 px-4">{item.content}</td>
                                         <td className="py-2 px-4">
                                             {editingIndex && editingIndex.section === 'advantages' && editingIndex.index === index ? (
                                                 <EditFormArray
                                                     heading={item.heading}
                                                     section="advantages"
                                                     index={index}
-                                                    content={item.heading}
-                                                    onSave={handleUpdate}
-                                                    onCancel={handleCancelEdit}
-                                                />
-                                            ) : (
-                                                item.heading
-                                            )}
-                                        </td>
-                                        <td className="py-2 px-4">
-                                            {editingIndex && editingIndex.section === 'advantages' && editingIndex.index === index ? (
-                                                <EditFormArray
-                                                    heading={item.content}
-                                                    section="advantages"
-                                                    index={index}
                                                     content={item.content}
                                                     onSave={handleUpdate}
                                                     onCancel={handleCancelEdit}
-                                                />
-                                            ) : (
-                                                item.content
-                                            )}
-                                        </td>
-                                        <td className="py-2 px-4">
-                                            <button
-                                                className="bg-primary hover:bg-primary-dark text-white font-bold py-1 px-2 rounded"
-                                                onClick={() => handleEdit('advantages', index)}
-                                            >
-                                                Edit
-                                            </button>
+                                                ></EditFormArray>
+                                            ) :
+                                                <button
+                                                    className="bg-primary hover:bg-primary-dark text-white font-bold py-1 px-2 rounded"
+                                                    onClick={() => handleEdit('advantages', index)}
+                                                >
+                                                    Edit
+                                                </button>
+                                            }
                                         </td>
                                     </tr>
                                 ))}
