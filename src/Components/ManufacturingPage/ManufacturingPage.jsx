@@ -2,8 +2,8 @@
 import { get, ref, set, onValue, off } from 'firebase/database';
 import React, { useEffect, useState } from 'react';
 import { db } from '../../../firebase';
-import AdvantageCard from './ManufacturingPageComponents/AdvantageCard';
-import ApplicationCard from './ManufacturingPageComponents/ApplicationCard';
+import AdvantageCard from '../Product/ProductComponents/AdvantageCard';
+import ApplicationCard from '../Product/ProductComponents/ApplicationCard';
 
 const ManufacturingPage = () => {
     const manufacturingPages = ['BFS', 'FFS', 'ISBM', 'IV'];

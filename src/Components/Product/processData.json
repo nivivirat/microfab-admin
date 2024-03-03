@@ -1,0 +1,14 @@
+[
+    {
+        "process" : "Blow",
+        "content" : "The BFS process begins with the extrusion of plastic granules into a parison, a hollow tube-like structure. This parison is then enclosed within a mold."
+    },
+    {
+        "process" : "Fill",
+        "content" : "Once the mold is closed, the parison is filled with the product, typically a sterile liquid or pharmaceutical solution. The precise volume is carefully controlled to ensure accuracy and consistency."
+    },
+    {
+        "process" : "Seal",
+        "content" : "After filling, the parison is sealed at both ends, forming a hermetically sealed container. This step ensures the product's sterility and protection from external contaminants."
+    }
+]

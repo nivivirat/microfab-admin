@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
 const AdminPanel = () => {
-  const [mediaData, setMediaData] = useState([]);
-  const [mediaData1, setMediaData1] = useState([]);
+  const [ProductData, setProductData] = useState([]);
+  const [ProductData1, setProductData1] = useState([]);
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -21,7 +21,7 @@ const AdminPanel = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
 
-  const [mediaCardData, setMediaCardData] = useState([]);
+  const [ProductCardData, setProductCardData] = useState([]);
   const [formData1, setFormData1] = useState({
     img: '',
     title: '',
@@ -34,34 +34,34 @@ const AdminPanel = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const mediaSnapshot = await database.get('media');
-        const mediaData = mediaSnapshot.val();
+        const ProductSnapshot = await database.get('Product');
+        const ProductData = ProductSnapshot.val();
 
-        if (mediaData) {
-          const dataArray = Object.entries(mediaData).map(([uid, data]) => ({ uid, ...data }));
-          setMediaData(dataArray);
+        if (ProductData) {
+          const dataArray = Object.entries(ProductData).map(([uid, data]) => ({ uid, ...data }));
+          setProductData(dataArray);
         }
       } catch (error) {
-        console.error('Error fetching media data from Firebase:', error);
+        console.error('Error fetching Product data from Firebase:', error);
       }
     };
 
-    const fetchMediaCardData = async () => {
+    const fetchProductCardData = async () => {
       try {
-        const mediaCardSnapshot = await database.get('mediacard');
-        const mediaCardData = mediaCardSnapshot.val();
+        const ProductCardSnapshot = await database.get('Productcard');
+        const ProductCardData = ProductCardSnapshot.val();
 
-        if (mediaCardData) {
-          const dataArray = Object.entries(mediaCardData).map(([uid, data]) => ({ uid, ...data }));
-          setMediaCardData(dataArray);
+        if (ProductCardData) {
+          const dataArray = Object.entries(ProductCardData).map(([uid, data]) => ({ uid, ...data }));
+          setProductCardData(dataArray);
         }
       } catch (error) {
-        console.error('Error fetching media card data from Firebase:', error);
+        console.error('Error fetching Product card data from Firebase:', error);
       }
     };
 
     fetchData();
-    fetchMediaCardData();
+    fetchProductCardData();
   }, []);
 
   const handleAddNew = () => {
@@ -71,8 +71,8 @@ const AdminPanel = () => {
   };
 
   const handleEdit = (uid) => {
-    const selectedMedia = mediaData.find((media) => media.uid === uid);
-    setFormData(selectedMedia);
+    const selectedProduct = ProductData.find((Product) => Product.uid === uid);
+    setFormData(selectedProduct);
     setEditingUid(uid);
     setShowEditForm(true);
     setShowAddForm(false);
@@ -125,39 +125,31 @@ const AdminPanel = () => {
       const timestamp  = Date.now(); // Get the server timestamp
 
       if (editingUid) {
-        await database.set(`media/${editingUid}`, {
-          img: imgURL,
-          heading: formData.heading,
-          description: formData.description,
-          routerlink: formData.routerlink,
-          date: formData.date,
+        await database.set(`Product/${editingUid}`, {
+          bannerimg: imgURL,
+          routerName: formData.heading,
           timestamp: timestamp, // Include the timestamp
         });
       } else {
-        await database.push('media', {
-          img: imgURL,
-          heading: formData.heading,
-          description: formData.description,
-          routerlink: formData.routerlink,
-          date: formData.date,
+        await database.push('Product', {
+          bannerimg: imgURL,
+          routerName: formData.heading,
           timestamp: timestamp, // Include the timestamp
         });
       }
 
-      alert('Media updated successfully! Please Refresh the page');
+      alert('Product updated successfully! Please Refresh the page');
       setFormData({
-        img: '',
-        heading: '',
-        description: '',
-        routerlink: '',
-        date: '',
+        bannerimg: '',
+        routerName: '',
+        timestamp: '',
       });
       setImageFile(null);
       setEditingUid(null);
       setShowAddForm(false);
       setShowEditForm(false);
     } catch (error) {
-      console.error('Error updating media:', error);
+      console.error('Error updating Product:', error);
     }
   };
 
@@ -173,26 +165,26 @@ const AdminPanel = () => {
   };
 
   const handleDelete = async (uid) => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this media?');
+    const confirmDelete = window.confirm('Are you sure you want to delete this Product?');
     if (!confirmDelete) {
       return;
     }
 
     try {
-      await database.remove(`media/${uid}`);
-      alert('Media deleted successfully! Please Refresh the page');
-      setMediaData((prevData) => prevData.filter((media) => media.uid !== uid));
+      await database.remove(`Product/${uid}`);
+      alert('Product deleted successfully! Please Refresh the page');
+      setProductData((prevData) => prevData.filter((Product) => Product.uid !== uid));
     } catch (error) {
-      console.error('Error deleting media:', error);
+      console.error('Error deleting Product:', error);
     }
   };
-  const generateRoute = (media) => {
-    if (media && media.uid) {
-      const sanitizedHeading = media.heading.replace(/\s+/g, '-');
-      return `/media/${media.uid}/${sanitizedHeading}`;
+  const generateRoute = (Product) => {
+    if (Product && Product.uid) {
+      const sanitizedHeading = Product.routerName.replace(/\s+/g, '-');
+      return `/Product/${Product.uid}/${sanitizedHeading}`;
     } else {
       // Handle the case where uid is undefined
-      console.error('Invalid media object:', media);
+      console.error('Invalid Product object:', Product);
       return '/error'; // or any other fallback route
     }
   };
@@ -220,18 +212,18 @@ const AdminPanel = () => {
       }
 
       if (editingUid1) {
-        await database.set(`mediacard/${editingUid1}`, {
+        await database.set(`Productcard/${editingUid1}`, {
           img: imgURL1,
           title: formData1.title,
         });
       } else {
-        await database.push('mediacard', {
+        await database.push('Productcard', {
           img: imgURL1,
           title: formData1.title,
         });
       }
 
-      alert('Media card updated successfully! Please Refresh the page');
+      alert('Product card updated successfully! Please Refresh the page');
       setFormData1({
         img: '',
         title: '',
@@ -241,7 +233,7 @@ const AdminPanel = () => {
       setShowAddForm1(false);
       setShowEditForm1(false);
     } catch (error) {
-      console.error('Error updating media card:', error);
+      console.error('Error updating Product card:', error);
     }
   };
 
@@ -249,7 +241,7 @@ const AdminPanel = () => {
     <>
 
       <div style={{ textAlign: 'center', margin: 'auto', width: '80%', padding: '20px' }} className='relative'>
-        <h2 style={{ fontSize: '32px', color: 'primary' }} className='text-primary'>Admin Panel</h2>
+        {/* <h2 style={{ fontSize: '32px', color: 'primary' }} className='text-primary'>Admin Panel</h2> */}
 
         <button
           style={{
@@ -262,7 +254,7 @@ const AdminPanel = () => {
           className='bg-primary'
           onClick={handleAddNew}
         >
-          Add New Article
+          Add New Product Page
         </button>
 
         {showAddForm && (
@@ -270,7 +262,7 @@ const AdminPanel = () => {
             <form onSubmit={handleFormSubmit} className="mt-8 p-8 bg-white rounded-lg shadow-md w-96 mx-auto">
               <div className="mb-4">
                 <label htmlFor="image" className="block text-gray-700 text-sm font-bold mb-2">
-                  Image
+                  Banner Image
                 </label>
                 <br></br>
                 <h6>Please provide same dimension of all images in this section preferrably (500 * 500)</h6>
@@ -285,7 +277,7 @@ const AdminPanel = () => {
 
               <div className="mb-4">
                 <label htmlFor="heading" className="block text-gray-700 text-sm font-bold mb-2">
-                  Heading:
+                  Router Name (Example : BFS)
                 </label>
                 <input
                   type="text"
@@ -297,7 +289,7 @@ const AdminPanel = () => {
                 />
               </div>
 
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">
                   Domain:
                 </label>
@@ -308,7 +300,7 @@ const AdminPanel = () => {
                   onChange={handleInputChange}
                   className="w-full border rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
                 />
-              </div>
+              </div> */}
 
               {/* <div className="mb-4">
                 <label htmlFor="routerlink" className="block text-gray-700 text-sm font-bold mb-2">
@@ -323,7 +315,7 @@ const AdminPanel = () => {
                   className="w-full border rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
                 />
               </div> */}
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <label htmlFor="routerlink" className="block text-gray-700 text-sm font-bold mb-2">
                   Date:
                 </label>
@@ -335,14 +327,14 @@ const AdminPanel = () => {
                   onChange={handleInputChange}
                   className="w-full border rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
                 />
-              </div>
+              </div> */}
 
               <div className="flex justify-center">
                 <button
                   type="submit"
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
-                > 
-                  Save New Article
+                >
+                  Save New Product Page
                 </button>
                 <button
                   type="button"
@@ -362,7 +354,7 @@ const AdminPanel = () => {
             <form onSubmit={handleFormSubmit} className="mt-8 p-8 bg-white rounded-lg shadow-md w-96 mx-auto">
               <div className="mb-4">
                 <label htmlFor="image" className="block text-gray-700 text-sm font-bold mb-2">
-                  Image:
+                  Banner img
                 </label><br></br>
                 <h6>Please provide same dimension of all images in this section preferrably (500 * 500)</h6>
                 <input
@@ -376,19 +368,19 @@ const AdminPanel = () => {
 
               <div className="mb-4">
                 <label htmlFor="heading" className="block text-gray-700 text-sm font-bold mb-2">
-                  Heading:
+                  Router Name (Example : BFS)
                 </label>
                 <input
                   type="text"
                   id="heading"
                   name="heading"
-                  value={formData.heading}
+                  value={formData.bannerimg}
                   onChange={handleInputChange}
                   className="w-full border rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">
                   Domain:
                 </label>
@@ -399,7 +391,7 @@ const AdminPanel = () => {
                   onChange={handleInputChange}
                   className="w-full border rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
                 />
-              </div>
+              </div> */}
 
               {/* <div className="mb-4">
                 <label htmlFor="routerlink" className="block text-gray-700 text-sm font-bold mb-2">
@@ -414,7 +406,7 @@ const AdminPanel = () => {
                   className="w-full border rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
                 />
               </div> */}
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <label htmlFor="routerlink" className="block text-gray-700 text-sm font-bold mb-2">
                   Date:
                 </label>
@@ -426,7 +418,7 @@ const AdminPanel = () => {
                   onChange={handleInputChange}
                   className="w-full border rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
                 />
-              </div>
+              </div> */}
 
               <div className="flex justify-center">
                 <button
@@ -449,18 +441,18 @@ const AdminPanel = () => {
 
 
         <div>
-          {mediaData.slice().reverse().map((media) => (
-            <div key={media.uid} style={{ border: '1px solid #013A98', padding: '20px', marginBottom: '20px', borderRadius: '10px', textAlign: 'left' }}>
-              <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px' }}>Article : {media.heading}</p>
-              <img src={media.img} alt={`Media ${media.uid}`} className='w-full h-[200px] object-contain' style={{ maxWidth: '100%', marginBottom: '10px', borderRadius: '5px' }} />
-              <p style={{ fontSize: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Heading: {media.heading}</p>
-              <p style={{ fontSize: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Domain: {media.description}</p>
-              <p style={{ fontSize: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Router Link: {media.routerlink}</p>
-              <p style={{ fontSize: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Date: {media.date}</p>
-              <button style={{ fontSize: '18px', backgroundColor: '#013A98', color: 'white', padding: '5px', borderRadius: '5px', marginRight: '5px' }} onClick={() => handleEdit(media.uid)}>
+          {ProductData.slice().reverse().map((Product) => (
+            <div key={Product.uid} style={{ border: '1px solid #013A98', padding: '20px', marginBottom: '20px', borderRadius: '10px', textAlign: 'left' }}>
+              <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px' }}>Product : {Product.routerName}</p>
+              <img src={Product.bannerimg} alt={`Product ${Product.uid}`} className='w-full h-[200px] object-contain' style={{ maxWidth: '100%', marginBottom: '10px', borderRadius: '5px' }} />
+              <p style={{ fontSize: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Heading: {Product.routerName}</p>
+              {/* <p style={{ fontSize: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Domain: {Product.description}</p>
+              <p style={{ fontSize: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Router Link: {Product.routerlink}</p>
+              <p style={{ fontSize: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Date: {Product.date}</p> */}
+              <button style={{ fontSize: '18px', backgroundColor: '#013A98', color: 'white', padding: '5px', borderRadius: '5px', marginRight: '5px' }} onClick={() => handleEdit(Product.uid)}>
                 Edit
               </button>
-              <button style={{ fontSize: '18px', backgroundColor: 'red', color: 'white', padding: '5px', borderRadius: '5px' }} onClick={() => handleDelete(media.uid)}>
+              <button style={{ fontSize: '18px', backgroundColor: 'red', color: 'white', padding: '5px', borderRadius: '5px' }} onClick={() => handleDelete(Product.uid)}>
                 Delete
               </button>
               {/* Gulshan Start */}
@@ -474,7 +466,7 @@ const AdminPanel = () => {
                     borderRadius: '5px',
                   }}
                 >
-                  <Link to={generateRoute(media)}>Go to Your Route</Link>
+                  <Link to={generateRoute(Product)}>Go to Your Route</Link>
 
 
                 </button>
@@ -490,7 +482,7 @@ const AdminPanel = () => {
                   }}
                 >
                   <a
-                    href={`https://microfab-admin-test.onrender.com/#${generateRoute(media)}`}
+                    href={`https://reifenhauser.onrender.com${generateRoute(Product)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -523,7 +515,7 @@ const AdminPanel = () => {
               </label>
 
               <button type="submit" style={{ fontSize: '20px', padding: '10px', backgroundColor: '#013A98', color: 'white', borderRadius: '5px', marginTop: '10px' }}>
-                Save New Media Card
+                Save New Product Card
               </button>
               <button
                 type="button"
@@ -564,16 +556,16 @@ const AdminPanel = () => {
         )}
 
         <div>
-          {/* {mediaData1.map((media) => (
-          <div key={media.uid} style={{ border: '1px solid #013A98', padding: '20px', marginBottom: '20px', borderRadius: '10px', textAlign: 'left' }}>
-            <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px' }}>Media Card {media.uid}</p>
-            <img src={media.img} alt={`Media Card ${media.uid}`} style={{ maxWidth: '100%', marginBottom: '10px', borderRadius: '5px' }} />
-            <p style={{ fontSize: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Title: {media.title}</p>
+          {/* {ProductData1.map((Product) => (
+          <div key={Product.uid} style={{ border: '1px solid #013A98', padding: '20px', marginBottom: '20px', borderRadius: '10px', textAlign: 'left' }}>
+            <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px' }}>Product Card {Product.uid}</p>
+            <img src={Product.img} alt={`Product Card ${Product.uid}`} style={{ maxWidth: '100%', marginBottom: '10px', borderRadius: '5px' }} />
+            <p style={{ fontSize: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Title: {Product.title}</p>
 
-            <button style={{ fontSize: '18px', backgroundColor: '#013A98', color: 'white', padding: '5px', borderRadius: '5px', marginRight: '5px' }} onClick={() => handleEdit1(media.uid)}>
+            <button style={{ fontSize: '18px', backgroundColor: '#013A98', color: 'white', padding: '5px', borderRadius: '5px', marginRight: '5px' }} onClick={() => handleEdit1(Product.uid)}>
               Edit
             </button>
-            <button style={{ fontSize: '18px', backgroundColor: 'red', color: 'white', padding: '5px', borderRadius: '5px' }} onClick={() => handleDelete1(media.uid)}>
+            <button style={{ fontSize: '18px', backgroundColor: 'red', color: 'white', padding: '5px', borderRadius: '5px' }} onClick={() => handleDelete1(Product.uid)}>
               Delete
             </button>
           </div>

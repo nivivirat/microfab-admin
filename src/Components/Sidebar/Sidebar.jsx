@@ -47,7 +47,7 @@ export default function SideBar() {
                             </div>
 
                             <div>
-                                <ul className='flex flex-col gap-2 mt-5 overflow-y-scroll'>
+                                <ul className='flex flex-col gap-1.5 mt-0 overflow-y-scroll'>
                                     <Nav title={"Home Banner"} destination={""} />
                                     <Nav title={"Analytics"} destination={"Analytics"} />
                                     <Nav title={"Contact Us"} destination={"ContactUs"} />
@@ -60,6 +60,7 @@ export default function SideBar() {
                                     <Nav title={"Social Media"} destination={"SocialMedia"} />
                                     <Nav title={"Medical Devices"} destination={"MedicalDevices"} />
                                     <Nav title={"Articles"} destination={"Media"} />
+                                    <Nav title={"New Product Page"} destination={"NewProduct"} />
                                 </ul>
                             </div>
                         </div>
