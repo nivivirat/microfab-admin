@@ -139,17 +139,6 @@ export default function MouldSlidePreview() {
                         </div>
                     </div>
                     <div className="flex flex-wrap gap-x-24">
-                        {topData.map((item, index) => (
-                            <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-[#b9c7c9]' : 'bg-primary'}`}>
-                                <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-[#b9c7c9]'}`}>
-                                    {/* Display content for top section */}
-                                    {item.imageUrl && <img src={item.imageUrl} alt={`${index + 1}`} className="py-1 pt-3 w-10 h-10 object-contain" />}
-                                </div>
-                                <p className="text-[14px] font-['ClashDisplay'] mt-2">{item.line1}</p>
-                                <p className="text-[14px] font-['ClashDisplay']">{item.line2}</p>
-                                <p onClick={() => handleEdit(index, 'top')} className="cursor-pointer text-[20px] absolute -right-6 top-3"><Icon icon="typcn:edit" /></p>
-                            </div>
-                        ))}
                         {middleData.map((item, index) => (
                             <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-white border border-primary' : 'bg-primary'}`}>
                                 <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-white'}`}>
@@ -159,17 +148,6 @@ export default function MouldSlidePreview() {
                                 <p className="text-[14px] font-['ClashDisplay'] mt-2">{item.line1}</p>
                                 <p className="text-[14px] font-['ClashDisplay']">{item.line2}</p>
                                 <p onClick={() => handleEdit(index, 'middle')} className="cursor-pointer text-[20px] absolute -right-6 top-3"><Icon icon="typcn:edit" /></p>
-                            </div>
-                        ))}
-                        {bottomData.map((item, index) => (
-                            <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-[#b9c7c9]' : 'bg-primary'}`}>
-                                <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-[#b9c7c9]'}`}>
-                                    {/* Display content for bottom section */}
-                                    {item.imageUrl && <img src={item.imageUrl} alt={`${index + 1}`} className="py-1 pt-3 w-10 h-10 object-contain" />}
-                                </div>
-                                <p className="text-[14px] font-['ClashDisplay'] mt-2">{item.line1}</p>
-                                <p className="text-[14px] font-['ClashDisplay']">{item.line2}</p>
-                                <p onClick={() => handleEdit(index, 'bottom')} className="cursor-pointer text-[20px] absolute -right-6 top-3"><Icon icon="typcn:edit" /></p>
                             </div>
                         ))}
                     </div>

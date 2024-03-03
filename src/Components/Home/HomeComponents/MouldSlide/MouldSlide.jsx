@@ -58,11 +58,11 @@ export default function MouldSlide() {
           <Sliderop options={{ align: "center" }}>
             {topData.map((item, index) => (
               <div key={item.order} className={`rotate-180 leading-5 h-[100px] w-[250px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 !== 0 ? 'bg-[#b9c7c9]' : 'bg-primary'}`}>
-                <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 !== 0 ? 'text-primary' : 'text-[#b9c7c9]'}`} >
+                <div className={`opacity-0 h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 !== 0 ? 'text-primary' : 'text-[#b9c7c9]'}`} >
                   {item.imageUrl && <img src={item.imageUrl} alt={`${index + 1}`} className="py-1 pt-3 w-10 h-10 object-contain" />}
                 </div>
-                <p className="text-[14px] font-bold mt-3">{item.line1}</p>
-                <p className="text-[12px]">{item.line2}</p>
+                <p className="text-[14px] opacity-0 font-bold mt-3">{item.line1}</p>
+                <p className="text-[12px] opacity-0">{item.line2}</p>
               </div>
             ))}
           </Sliderop>
@@ -92,11 +92,11 @@ export default function MouldSlide() {
           <Sliderop options={{ align: "center" }}>
             {bottomData.map((item, index) => (
               <div key={item.order} className={`rotate-180 leading-5 h-[100px] w-[230px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 !== 0 ? 'bg-[#b9c7c9]' : 'bg-primary'}`}>
-                <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 !== 0 ? 'text-primary' : 'text-[#3b9c7c9]'}`} >
+                <div className={`h-[20px] opacity-0 w-[60px] place-items-center justify-center flex text-center ${index % 2 !== 0 ? 'text-primary' : 'text-[#3b9c7c9]'}`} >
                   {item.imageUrl && <img src={item.imageUrl} alt={`${index + 1}`} className="py-3 pt-3 w-10 h-10 object-contain" />}
                 </div>
-                <p className="text-[14px] font-bold mt-3">{item.line1}</p>
-                <p className="text-[12px]">{item.line2}</p>
+                <p className="text-[14px] opacity-0 font-bold mt-3">{item.line1}</p>
+                <p className="text-[12px] opacity-0">{item.line2}</p>
               </div>
             ))}
           </Sliderop>
