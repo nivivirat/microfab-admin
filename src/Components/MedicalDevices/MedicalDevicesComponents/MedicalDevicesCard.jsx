@@ -31,6 +31,8 @@ export default function MedicalDevicesCard({
         setIsEditing(false);
     };
 
+    console.log("lgfffffffff");
+
     return (
         <div
             className={`md:m-2 lg:w-[22%] md:w-[250px] w-full flex flex-col relative shadow-lg rounded-[20px]`}
@@ -38,7 +40,7 @@ export default function MedicalDevicesCard({
         >
             <div className="md:h-[190px] w-full">
                 <img
-                    src={img}
+                    src={images[img] || img}
                     alt="Medical Device"
                     className="w-full h-full rounded-[16px] object-cover"
                 />

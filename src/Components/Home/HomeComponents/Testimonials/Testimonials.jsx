@@ -82,6 +82,7 @@ export default function Testimonials() {
     return (
         <div className='px-10 border border-primary rounded-lg p-10 flex flex-col relative'>
             <h2 className="text-2xl font-bold mb-4">Testimonials</h2>
+            <p className='text-xl font-bold mb-4'>(Only 4 recent testimonials will be shown in desktop view)</p>
 
             <button
                 onClick={() => setAddFormVisible(true)}
@@ -122,14 +123,15 @@ export default function Testimonials() {
                     <form className="flex flex-col gap-4">
                         <label className="mb-2">
                             <span className="block text-gray-600">Content:</span>
+                            <p className='py-2 text-red-400'>The content must be less than 60 words</p>
                             <textarea name="content" onChange={handleInputChange} className="border p-2 w-full"></textarea>
                         </label>
                         <label className="mb-2">
-                            <span className="block text-gray-600">Author:</span>
+                            <span className="block text-gray-600">Author: (optional)</span>
                             <input type="text" name="author" onChange={handleInputChange} className="border p-2 w-full" />
                         </label>
                         <label className="mb-4">
-                            <span className="block text-gray-600">Company:</span>
+                            <span className="block text-gray-600">Company: (optional)</span>
                             <input type="text" name="company" onChange={handleInputChange} className="border p-2 w-full" />
                         </label>
                         <button type="button" onClick={handleAddTestimonial} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300 ease-in-out">

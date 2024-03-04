@@ -482,7 +482,7 @@ const AdminPanel = () => {
                   }}
                 >
                   <a
-                    href={`https://reifenhauser.onrender.com${generateRoute(Product)}`}
+                    href={`https://microfab-admin-test.onrender.com/#${generateRoute(Product)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

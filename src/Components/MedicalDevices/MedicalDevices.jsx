@@ -1,6 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { uploadImage } from './firebase';
 import { getDatabase, ref, set, onValue, push } from 'firebase/database';
+import Catheters_IV from '../../assets/medicalDevices/Catheters_IV.svg';
+import Cannula_Scalp from '../../assets/medicalDevices/Cannula_Scalp.svg';
+import Vein_Sets from '../../assets/medicalDevices/Vein_Sets.svg';
+import IV_Infusion_Pump_Sets from '../../assets/medicalDevices/IV_Infusion_Pump_Sets.svg';
+import IV_Fluid_Bags from '../../assets/medicalDevices/IV_Fluid_Bags.svg';
+import IV_Tubing from '../../assets/medicalDevices/IV_Tubing.svg';
+import Syringes from '../../assets/medicalDevices/Syringes.svg';
+import IV_Extension_Sets from '../../assets/medicalDevices/IV_Extension_Sets.svg';
+import IV_Stopcocks from '../../assets/medicalDevices/IV_Stopcocks.svg';
+import IV_Filters from '../../assets/medicalDevices/IV_Filters.svg';
+import IV_Blood_Administration_Sets from '../../assets/medicalDevices/IV_Blood_Administration_Sets.svg';
+import Infusion_Set_Needles from '../../assets/medicalDevices/Infusion_Set_Needles.svg';
+import Pressure_Infusors from '../../assets/medicalDevices/Pressure_Infusors.svg';
+import IV_Drip_Chambers from '../../assets/medicalDevices/IV_Drip_Chambers.svg';
+import Safety_IV_Cathers from '../../assets/medicalDevices/Safety_IV_Cathers.svg';
+import IV_Administration_Sets_with_Flow_Regulators from '../../assets/medicalDevices/IV_Administration_Sets_with_Flow_Regulators.svg';
+import Peripheral_IV_Cannula_Dressing_Kits from '../../assets/medicalDevices/Peripheral_IV_Cannula_Dressing_Kits.svg';
+
+import SystemforFormulationLine from '../../assets/turnkeySolutions/SystemforFormulationLine.svg'
+import CIPSystems from '../../assets/turnkeySolutions/CIPSystems.svg'
+import MixingTanks from '../../assets/turnkeySolutions/MixingTanks.svg'
+import PressureVessels from '../../assets/turnkeySolutions/PressureVessels.svg'
 
 export default function MedicalDevices() {
     const [medicalDevicesData, setMedicalDevicesData] = useState({});
@@ -10,6 +32,31 @@ export default function MedicalDevices() {
     const [editedContent, setEditedContent] = useState('');
     const [editedImg, setEditedImg] = useState('');
     const [imageFile, setImageFile] = useState(null);
+
+    const images = {
+        CIPSystems,
+        MixingTanks,
+        PressureVessels,
+        SystemforFormulationLine,
+        Catheters_IV,
+        Cannula_Scalp,
+        Vein_Sets,
+        IV_Infusion_Pump_Sets,
+        IV_Fluid_Bags,
+        IV_Tubing,
+        Syringes,
+        IV_Extension_Sets,
+        IV_Stopcocks,
+        IV_Filters,
+        IV_Blood_Administration_Sets,
+        Infusion_Set_Needles,
+        Pressure_Infusors,
+        IV_Drip_Chambers,
+        Safety_IV_Cathers,
+        IV_Administration_Sets_with_Flow_Regulators,
+        Peripheral_IV_Cannula_Dressing_Kits,
+
+    };
 
     const database = getDatabase();
 
@@ -142,10 +189,10 @@ export default function MedicalDevices() {
                                                 onChange={handleImageChange}
                                                 className="mb-2"
                                             />
-                                            {imageFile && <img src={URL.createObjectURL(imageFile)} alt="Preview" className="w-[200px] h-[230px] object-cover rounded mb-2" />}
+                                            {imageFile && <img src={URL.createObjectURL(imageFile)} alt="Preview" className="w-[300px] h-[230px] object-cover rounded mb-2" />}
                                         </div>
                                     ) : (
-                                        <img src={medicalDevicesData[deviceKey].img} alt={medicalDevicesData[deviceKey].heading} className="w-[200px] h-[230px] object-cover rounded" />
+                                        <img src={images[medicalDevicesData[deviceKey].img] || medicalDevicesData[deviceKey].img } alt={medicalDevicesData[deviceKey].heading} className="w-[500px] h-[230px] object-cover rounded" />
                                     )}
                                 </td>
                                 <td className="py-2 px-4 border-b">

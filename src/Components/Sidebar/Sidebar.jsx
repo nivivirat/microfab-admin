@@ -49,18 +49,18 @@ export default function SideBar() {
                             <div>
                                 <ul className='flex flex-col gap-1.5 mt-0 overflow-y-scroll'>
                                     <Nav title={"Home Banner"} destination={""} />
-                                    <Nav title={"Analytics"} destination={"Analytics"} />
-                                    <Nav title={"Contact Us"} destination={"ContactUs"} />
-                                    <Nav title={"Query Form"} destination={"QueryForm"} />
-                                    <Nav title={"Who Are We"} destination={"WhoAreWe"} />
-                                    <Nav title={"Testimonials"} destination={"Testimonials"} />
+                                    <Nav title={"Home Analytics"} destination={"Analytics"} />
+                                    <Nav title={"Home TurnKey"} destination={"HomeTurnKey"} />
+                                    <Nav title={"Home Who Are We"} destination={"WhoAreWe"} />
+                                    <Nav title={"Home Testimonials"} destination={"Testimonials"} />
                                     <Nav title={"About Us"} destination={"AboutUs"} />
                                     <Nav title={"Manufacturing Page"} destination={"ManufacturingPage"} />
-                                    <Nav title={"Home TurnKey"} destination={"HomeTurnKey"} />
-                                    <Nav title={"Social Media"} destination={"SocialMedia"} />
-                                    <Nav title={"Medical Devices"} destination={"MedicalDevices"} />
                                     <Nav title={"Articles"} destination={"Media"} />
                                     <Nav title={"New Product Page"} destination={"NewProduct"} />
+                                    <Nav title={"Medical Devices"} destination={"MedicalDevices"} />
+                                    <Nav title={"Contact Us"} destination={"ContactUs"} />
+                                    <Nav title={"Query Form"} destination={"QueryForm"} />
+                                    <Nav title={"Social Media"} destination={"SocialMedia"} />
                                 </ul>
                             </div>
                         </div>
