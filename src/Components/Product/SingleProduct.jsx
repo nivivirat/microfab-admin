@@ -24,10 +24,10 @@ export default function SingleProduct() {
             // Add more empty entries as needed
         ],
         applications: [
-            { heading: "", content: "", img: "" },
-            { heading: "", content: "", img: "" },
-            { heading: "", content: "", img: "" },
-            { heading: "", content: "", img: "" },
+            { heading: "", content: "", imageFile: "" },
+            { heading: "", content: "", imageFile: "" },
+            { heading: "", content: "", imageFile: "" },
+            { heading: "", content: "", imageFile: "" },
             // Add more empty entries as needed
         ],
         introduction: {
@@ -70,7 +70,7 @@ export default function SingleProduct() {
         setEditingIndex({ section, index });
     };
 
-    const handleUpdate = (section, index, updatedContent, updatedHeading) => {
+    const handleUpdate = (section, index, updatedContent, updatedHeading, imageFile) => {
         // Create a shallow copy of the data
         const newData = { ...data };
 
@@ -82,6 +82,11 @@ export default function SingleProduct() {
             newData[section][index] = newData[section][index] || {};
             newData[section][index].heading = updatedHeading !== undefined ? updatedHeading : newData[section][index].heading;
             newData[section][index].content = updatedContent !== undefined ? updatedContent : newData[section][index].content;
+
+            if (section === "applications") {
+                newData[section][index].imageFile = imageFile !== undefined ? imageFile : newData[section][index].imageFile;
+                // newData[section][index].img = imageFile !== undefined ? imageFile : newData[section][index].imageFile;
+            }
         }
 
         else if (typeof newData[section] === 'object') {
@@ -153,6 +158,44 @@ export default function SingleProduct() {
 
             const newData = { ...data }
             newData.bannerImg = imgURL || "";
+
+            console.log(imgURL);
+
+            setData(newData);
+
+            // Update the data in the database
+            const databaseRef = ref(db, `ProductContent/${id}`);
+            await set(databaseRef, newData);
+
+            console.log("Data successfully saved to the database");
+            alert("Success");
+        } catch (error) {
+            console.error("Error saving data to the database:", error);
+            alert("Error uploading image");
+        } finally {
+            // Hide loading screen
+            setLoading(false);
+        }
+    };
+    const handleImageChangeprocess = async (e) => {
+        const file = e.target.files[0];
+        setImageFile(file);
+
+        // Check if a file is selected
+        if (!file) {
+            return;
+        }
+
+        // Show loading screen
+        setLoading(true);
+
+        try {
+            const storageRef = storageFunctions.ref(`images/${file.name}`);
+            await storageFunctions.uploadBytes(storageRef, file);
+            const imgURL = await storageFunctions.getDownloadURL(storageRef);
+
+            const newData = { ...data }
+            newData.processimg = imgURL || "";
 
             console.log(imgURL);
 
@@ -291,6 +334,29 @@ export default function SingleProduct() {
                         </div>
                     )}
 
+                    <h4 className="mt-8 mb-4 text-2xl font-semibold text-primary border-b-2 border-primary pb-2">
+                        Process Image
+                    </h4>
+                    <div>
+                        <label htmlFor="image" className="block text-gray-700 text-sm font-bold mb-2">
+                            Image
+                        </label>
+
+                        <div className='flex flex-row'>
+                            <div className='mr-10'>
+                                <h6>Please provide same dimension of all images in this section preferrably (500 * 500)</h6>
+                                <input
+                                    type="file"
+                                    id="image"
+                                    accept="image/*"
+                                    onChange={handleImageChangeprocess}
+                                    className="w-full border rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+                                />
+                            </div>
+                            <img src={data?.processimg} className='w-[40vw]'></img>
+                        </div>
+                    </div>
+
                     <div>
                         <h4 className="mt-12 mb-4 text-2xl font-semibold text-primary border-b-2 border-primary pb-2">
                             Process
@@ -409,7 +475,7 @@ export default function SingleProduct() {
                                             <td className="py-2 px-4">{index + 1}</td>
                                             <td className="py-2 px-4">{item.heading}</td>
                                             <td className="py-2 px-4">{item.content}</td>
-                                            <td className="py-2 px-4">{item.img && <img src={item.img} alt={item.heading} className="max-h-12" />}</td>
+                                            <td className="py-2 px-4 place-items-center justify-center flex">{item.imageFile && <img src={item.imageFile} alt={item.heading} className="max-h-12" />}</td>
                                             <td className="py-2 px-4">
                                                 {editingIndex && editingIndex.section === 'applications' && editingIndex.index === index ? (
                                                     <EditFormArray
