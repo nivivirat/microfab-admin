@@ -185,7 +185,7 @@ export default function MouldSlidePreview() {
                             onChange={(e) => setEditedData({ ...editedData, line2: e.target.value })}
                             className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:border-primary focus:ring focus:ring-primary"
                         />
-                        <label htmlFor="editedImage" className="block text-sm font-semibold mt-4">Image:</label><span className="text-red">The image must have no-background</span><br></br><span>Image dimension </span>
+                        <label htmlFor="editedImage" className="block text-sm font-semibold mt-4">Image:</label><span className="text-red-400">The image must have no-background</span><br></br><span className="text-red-400">Image dimension 10px * 10px</span>
                         <input
                             type="file"
                             id="editedImage"
