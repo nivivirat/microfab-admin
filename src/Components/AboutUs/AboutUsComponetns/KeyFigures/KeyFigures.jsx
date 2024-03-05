@@ -1,14 +1,16 @@
-import { get, ref, update } from 'firebase/database';
+import { get, ref, update, set } from 'firebase/database';
 import React, { useEffect, useState } from 'react';
 import CountUp from 'react-countup';
 import { db } from '../../../../../firebase';
 import figure from '../../../../assets/AboutUs/KeyFigures/figures.svg'
+import { storageFunctions } from '../../../Product/firebase';
 
 const KeyFigures = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editMode, setEditMode] = useState(false);
+    const [imageFile, setImageFile] = useState(null);
 
     useEffect(() => {
         const keyFiguresRef = ref(db, 'AboutUs/keyFigures');
@@ -62,17 +64,64 @@ const KeyFigures = () => {
         setEditMode(false);
     };
 
+    const handleImageChange = async (e) => {
+        const file = e.target.files[0];
+        setImageFile(file);
+
+        // Check if a file is selected
+        if (!file) {
+            return;
+        }
+
+        // Show loading screen
+        setLoading(true);
+
+        try {
+            const storageRef = storageFunctions.ref(`images/${file.name}`);
+            await storageFunctions.uploadBytes(storageRef, file);
+            const imgURL = await storageFunctions.getDownloadURL(storageRef);
+
+            // Update the data in the database
+            const databaseRef = ref(db, `AboutUs/keyFigures/img`);
+            await set(databaseRef, imgURL);
+
+            console.log("Data successfully saved to the database");
+            alert("The image is updated successfully! Please refresh the page to see the changes.");
+        } catch (error) {
+            console.error("Error saving data to the database:", error);
+            alert("Error uploading image");
+        } finally {
+            // Hide loading screen
+            setLoading(false);
+        }
+    };
+
+    console.log(data);
+
     return (
         <div className='px-10 border border-primary rounded-lg p-10 flex-row'>
             <div className='pl-10'>
                 <ul className='list-disc'>
                     <li>place only numbers in the left box to get counting animation</li>
+                    <div className="flex flex-col mt-8">
+                        <label htmlFor="image" className="cursor-pointer w-[450px] bg-primary text-center text-white rounded-md py-2 px-4 transition duration-300">
+                            Change Image (dimension 650 h px * 600 w px)
+                        </label>
+                        <input
+                            type="file"
+                            id="image"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden" // Hide the default input styling
+                        />
+                    </div>
+
                 </ul>
             </div>
             {data && (
                 <div className="flex mt-12 h-[600px] animate__animated animate__fadeInLeft animate__delay-2s">
                     <div className="bg-white md:mb-32 mb-44">
-                        <img src={figure} alt={data.blocks[0].imageAlt} className="w-[650px] md:block hidden h-full object-cover" />
+                        <img src={data.img} alt={data.blocks[0].imageAlt} className="w-[650px] md:block hidden h-full object-cover" />
                     </div>
                     <div className="flex-1 mb-24 sm:ml-0 bg-white p-8 flex flex-col place-items-center justify-center">
                         <h3 className="lg:ml-0 sm:ml-0 text-5xl sm:text-4xl text-[#8AA6AA] pb-5 leading-tight font-['ClashDisplay']">
