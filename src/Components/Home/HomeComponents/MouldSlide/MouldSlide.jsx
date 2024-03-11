@@ -47,7 +47,7 @@ export default function MouldSlide() {
   }, []);
 
   topData = [...topData, ...topData, ...topData];
-  middleData = [...middleData, ...middleData , ...middleData];
+  middleData = [...middleData, ...middleData, ...middleData];
   bottomData = [...bottomData, ...bottomData, ...bottomData];
 
   return (
@@ -74,12 +74,16 @@ export default function MouldSlide() {
         <div className="overflow-x-scroll text-center flex place-items-center justify-center w-full" ref={middleScrollRef} style={{ overflowX: 'hidden', scrollBehavior: 'smooth' }}>
           <Slider options={{ align: "center" }}>
             {middleData.map((item, index) => (
-              <div key={item.order} className={`leading-5 h-full w-[200px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-white' : 'bg-primary'}`}>
-                <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-white'}`} >
-                  {item.imageUrl && <img src={item.imageUrl} alt={`${index + 1}`} className="py-1 pt-3 w-10 h-10 object-contain" />}
-                </div>
+              <div key={item.order} className={`leading-5 h-[80px] w-[200px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-white' : 'bg-primary'}`}>
+                {item.imageUrl ? (
+                  <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-white'}`}>
+                    <img src={item.imageUrl} alt={`${index + 1}`} className="py-1 pt-3 w-10 h-10 object-contain" />
+                  </div>
+                ) : null}
                 <p className="text-[14px] font-bold mt-3">{item.line1}</p>
-                <p className="text-[12px]">{item.line2}</p>
+                {item.line2 ? (
+                  <p className="text-[14px]">{item.line2}</p>
+                ): null}
               </div>
             ))}
           </Slider>

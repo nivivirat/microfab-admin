@@ -142,7 +142,7 @@ export default function MouldSlidePreview() {
                         {middleData.map((item, index) => (
                             <div key={item.order} className={`relative leading-5 h-[65px] w-[110px] px-5 rounded-[20px] flex flex-col justify-center place-items-center font-bold ${index % 2 === 0 ? 'bg-white border border-primary' : 'bg-primary'}`}>
                                 <div className={`h-[20px] w-[60px] place-items-center justify-center flex text-center ${index % 2 === 0 ? 'text-primary' : 'text-white'}`}>
-                                    {/* Display content for middle section */}
+                                    
                                     {item.imageUrl && <img src={item.imageUrl} alt={`${index + 1}`} className="py-1 pt-3 w-10 h-10 object-contain" />}
                                 </div>
                                 <p className="text-[14px] font-['ClashDisplay'] mt-2">{item.line1}</p>
